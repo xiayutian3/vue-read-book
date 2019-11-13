@@ -9,14 +9,14 @@
 import Epub from 'epubjs'
 global.ePub = Epub
 export default {
-  name: 'home',
-  mounted () {
-    this.book = new Epub('/2018_Book_AgileProcessesInSoftwareEngine.epub')
-    console.log(this.book)
-    this.book.renderTo('read', {
-      width: window.innerWidth,
-      height: window.innerHeight
-    }).display()
-  }
+  name: 'home'
+  // mounted () {
+  //   this.book = new Epub('/2018_Book_AgileProcessesInSoftwareEngine.epub')
+  //   console.log(this.book)
+  //   this.book.renderTo('read', {
+  //     width: window.innerWidth,
+  //     height: window.innerHeight
+  //   }).display()
+  // }
 }
 </script>
