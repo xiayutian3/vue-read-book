@@ -6,6 +6,7 @@ import store from './store'
 import './assets/styles/icon.css'
 // web字体的引入
 // import './assets/fonts/daysOne.css'
+
 import './assets/styles/globle.scss'
 
 Vue.config.productionTip = false
