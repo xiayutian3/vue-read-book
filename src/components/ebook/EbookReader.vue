@@ -31,6 +31,19 @@ export default {
     ...mapGetters(['fileName'])
   },
   methods: {
+    prevPage () {
+      if (this.rendition) {
+        this.rendition.prev()
+      }
+    },
+    nextPage () {
+      if (this.rendition) {
+        this.rendition.next()
+      }
+    },
+    toggleTitleAndMenu () {
+
+    },
     initEpub () {
       // 拼接niginx静态电子书URL
       const url = `${baseUrl}${this.fileName}.epub`
@@ -43,6 +56,28 @@ export default {
       })
       // 对电子书进行展示
       this.rendition.display()
+
+      // 对电子书（通过iframe来加载）进行事件操作
+      this.rendition.on('touchstart', event => {
+        this.touchStartX = event.changedTouches[0].clientX
+        this.touchStartTime = event.timeStamp
+      })
+      this.rendition.on('touchend', event => {
+        const offsetX = event.changedTouches[0].clientX - this.touchStartX
+        const time = event.timeStamp - this.touchStartTime
+        console.log(offsetX, time)
+        if (time > 200 && offsetX > 40) {
+          this.prevPage()
+        } else if (time > 200 && offsetX < -40) {
+          this.nextPage()
+        } else {
+          this.toggleTitleAndMenu()
+        }
+        // 禁止默认行为，禁止事件传播
+        // event.preventDefault() dom2 取消事件默认行为
+        event.stopPropagation()
+        return false // dom0 取消事件默认行为
+      })
     }
   },
   components: {},
