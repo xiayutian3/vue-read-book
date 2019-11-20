@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { ebookMixin } from '@/utils/mixin.js'
 import Epub from 'epubjs'
 global.ePub = Epub
 // nginx静态服务器的路径
@@ -13,6 +13,7 @@ global.ePub = Epub
 const baseUrl = 'http://localhost:8081/epub/'
 export default {
   name: 'ebook-reader',
+  mixins: [ebookMixin],
   props: [],
   data () {
     return {
@@ -23,31 +24,36 @@ export default {
   mounted () {
     const fileName = this.$route.params.fileName.split('|').join('/')
     // console.log(`${baseUrl}${fileName}.epub`)
-    this.$store.dispatch('setFileName', fileName).then(() => {
+    this.setFileName(fileName).then(() => {
       this.initEpub()
     })
-  },
-  computed: {
-    ...mapGetters(['fileName'])
   },
   methods: {
     prevPage () {
       if (this.rendition) {
         this.rendition.prev()
+        this.hideTitleAndMenu()
       }
     },
     nextPage () {
       if (this.rendition) {
         this.rendition.next()
+        this.hideTitleAndMenu()
       }
     },
     toggleTitleAndMenu () {
-
+      // this.$store.dispatch('setMenuVisible', !this.menuVisible)
+      this.setMenuVisible(!this.menuVisible)
+    },
+    hideTitleAndMenu () {
+      // this.$store.dispatch('setMenuVisible', false)
+      this.setMenuVisible(false)
     },
     initEpub () {
       // 拼接niginx静态电子书URL
       const url = `${baseUrl}${this.fileName}.epub`
       this.book = new Epub(url)
+      // console.log(this.book)
       // 渲染电子书
       this.rendition = this.book.renderTo('read', {
         width: window.innerWidth,
@@ -65,7 +71,7 @@ export default {
       this.rendition.on('touchend', event => {
         const offsetX = event.changedTouches[0].clientX - this.touchStartX
         const time = event.timeStamp - this.touchStartTime
-        console.log(offsetX, time)
+        // console.log(offsetX, time)
         if (time > 200 && offsetX > 40) {
           this.prevPage()
         } else if (time > 200 && offsetX < -40) {

@@ -1,8 +1,4 @@
 // @import './reset.scss'; // 也可以
 @import './reset';
-
-$ratio: 375 / 10;
-
-@function px2rem($px){
-  @return $px / $ratio + rem;
-}
+@import './mixin';
+@import './transition';
