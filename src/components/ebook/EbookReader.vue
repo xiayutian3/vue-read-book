@@ -43,16 +43,21 @@ export default {
     },
     toggleTitleAndMenu () {
       // this.$store.dispatch('setMenuVisible', !this.menuVisible)
+      if (this.menuVisible) {
+        this.setSettingVisible(-1)
+      }
       this.setMenuVisible(!this.menuVisible)
     },
     hideTitleAndMenu () {
       // this.$store.dispatch('setMenuVisible', false)
       this.setMenuVisible(false)
+      this.setSettingVisible(-1)
     },
     initEpub () {
       // 拼接niginx静态电子书URL
       const url = `${baseUrl}${this.fileName}.epub`
       this.book = new Epub(url)
+      this.setCurrentBook(this.book)
       // console.log(this.book)
       // 渲染电子书
       this.rendition = this.book.renderTo('read', {
