@@ -79,6 +79,7 @@ export default {
       .preview {
         flex: 0 0 px2rem(40);
         @include center;
+        // font-family: 'Droid Sans';
       }
       .select {
         display: flex;
