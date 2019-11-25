@@ -45,6 +45,7 @@ export default {
       // this.$store.dispatch('setMenuVisible', !this.menuVisible)
       if (this.menuVisible) {
         this.setSettingVisible(-1)
+        this.setFontFamilyVisible(false)
       }
       this.setMenuVisible(!this.menuVisible)
     },
@@ -52,6 +53,7 @@ export default {
       // this.$store.dispatch('setMenuVisible', false)
       this.setMenuVisible(false)
       this.setSettingVisible(-1)
+      this.setFontFamilyVisible(false)
     },
     initEpub () {
       // 拼接niginx静态电子书URL
@@ -88,6 +90,29 @@ export default {
         // event.preventDefault() dom2 取消事件默认行为
         event.stopPropagation()
         return false // dom0 取消事件默认行为
+      })
+
+      // ebook阅读器通过ifram引用，通过hooks方法, 修改web字体，传入的是链接，而不是路径
+      this.rendition.hooks.content.register(contents => {
+        // localhost  也可以换成 192.168.xx.xx
+        // 字体加载完后有promise的回调 (不使用回调也是可以的)
+
+        //  contents.addStylesheet('http://localhost:8081/fonts/droidSans.css')
+        //   contents.addStylesheet('http://localhost:8081/fonts/cabin.css')
+        //   contents.addStylesheet('http://localhost:8081/fonts/daysOne.css')
+        //   contents.addStylesheet('http://localhost:8081/fonts/montserrat.css')
+        //   contents.addStylesheet('http://localhost:8081/fonts/tangerine.css')
+
+        // 使用 vue-cli3 的环境变量 VUE_APP_RES_URL
+        Promise.all([
+          contents.addStylesheet(`${process.env.VUE_APP_RES_URL}/fonts/droidSans.css`),
+          contents.addStylesheet(`${process.env.VUE_APP_RES_URL}/fonts/cabin.css`),
+          contents.addStylesheet(`${process.env.VUE_APP_RES_URL}/fonts/daysOne.css`),
+          contents.addStylesheet(`${process.env.VUE_APP_RES_URL}/fonts/montserrat.css`),
+          contents.addStylesheet(`${process.env.VUE_APP_RES_URL}/fonts/tangerine.css`)
+        ]).then(() => {
+          // console.log('字体加载完成后需要做点什么。。。')
+        })
       })
     }
   },

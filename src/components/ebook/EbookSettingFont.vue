@@ -52,7 +52,7 @@ export default {
       this.setDefaultFontSize(fontSize)
     },
     showFontFamilyPopup () {
-      //
+      this.setFontFamilyVisible(true)
     }
   },
   components: {},
