@@ -2,6 +2,9 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+// 国际化
+import i18n from './lang'
+
 // 字体图标的引入
 import './assets/styles/icon.css'
 // web字体的引入
@@ -15,5 +18,6 @@ Vue.config.productionTip = false
 new Vue({
   router,
   store,
+  i18n,
   render: h => h(App)
 }).$mount('#app')

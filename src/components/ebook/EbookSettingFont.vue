@@ -5,7 +5,7 @@
         <div class="preview" :style="{fontSize: fontSizeList[0].fontSize + 'px'}">A</div>
         <div class="select">
           <div class="select-wrapper" v-for="(item, index) in fontSizeList" :key="index"
-               @click="setFontSize(item.fontSize + 'px')">
+               @click="setFontSize(item.fontSize)">
             <div class="line"></div>
             <div class="point-wrapper">
               <div class="point" v-show="defaultFontSize === item.fontSize">
@@ -32,6 +32,7 @@
 <script>
 import { FONT_SIZE_LIST } from '@/utils/book'
 import { ebookMixin } from '@/utils/mixin'
+import { saveFontSize } from '@/utils/localStorage'
 export default {
   name: '',
   mixins: [ebookMixin],
@@ -48,8 +49,9 @@ export default {
     setFontSize (fontSize) {
       // console.log(this.currentBook)
       // 设置电子书的字体
-      this.currentBook.rendition.themes.fontSize(fontSize)
+      this.currentBook.rendition.themes.fontSize(fontSize + 'px')
       this.setDefaultFontSize(fontSize)
+      saveFontSize(this.fileName, fontSize)
     },
     showFontFamilyPopup () {
       this.setFontFamilyVisible(true)

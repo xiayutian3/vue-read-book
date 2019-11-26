@@ -6,6 +6,7 @@
 
 <script>
 import { ebookMixin } from '@/utils/mixin.js'
+import { saveFontFamily, getFontFamily, getFontSize, saveFontSize } from '@/utils/localStorage'
 import Epub from 'epubjs'
 global.ePub = Epub
 // nginx静态服务器的路径
@@ -55,6 +56,24 @@ export default {
       this.setSettingVisible(-1)
       this.setFontFamilyVisible(false)
     },
+    initFontSize () {
+      let fontSize = getFontSize(this.fileName)
+      if (!fontSize) {
+        saveFontSize(this.fileName, this.defaultFontSize)
+      } else {
+        this.rendition.themes.fontSize(fontSize + 'px')
+        this.setDefaultFontSize(fontSize)
+      }
+    },
+    initFontFamily () {
+      let font = getFontFamily(this.fileName)
+      if (!font) {
+        saveFontFamily(this.fileName, this.defaultFontFamily)
+      } else {
+        this.rendition.themes.font(font)
+        this.setDefaultFontFamily(font)
+      }
+    },
     initEpub () {
       // 拼接niginx静态电子书URL
       const url = `${baseUrl}${this.fileName}.epub`
@@ -68,7 +87,13 @@ export default {
         methods: 'default'// 兼容微信
       })
       // 对电子书进行展示
-      this.rendition.display()
+      this.rendition.display().then(() => {
+        // 初始化字体大小
+        this.initFontSize()
+
+        // 初始化字体
+        this.initFontFamily()
+      })
 
       // 对电子书（通过iframe来加载）进行事件操作
       this.rendition.on('touchstart', event => {

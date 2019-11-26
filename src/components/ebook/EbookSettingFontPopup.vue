@@ -5,7 +5,7 @@
       <div class="ebook-popup-title-icon" @click="hide">
         <span class="icon-down2"></span>
       </div>
-      <span class="ebook-popup-title-text">选择字体</span>
+      <span class="ebook-popup-title-text">{{$t('book.selectFont')}}</span>
    </div>
 
     <div class="ebook-popup-list-wrapper">
@@ -23,6 +23,7 @@
 <script>
 import { FONT_FAMILY } from '@/utils/book'
 import { ebookMixin } from '@/utils/mixin'
+import { saveFontFamily } from '@/utils/localStorage'
 export default {
   name: '',
   mixins: [ebookMixin],
@@ -38,6 +39,7 @@ export default {
   methods: {
     setFontFamily (font) {
       this.setDefaultFontFamily(font)
+      saveFontFamily(this.fileName, font)
       // this.setFontFamilyVisible(false)
       // 设置电子书web字体
       if (font === 'Default') {
