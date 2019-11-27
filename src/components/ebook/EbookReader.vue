@@ -6,7 +6,7 @@
 
 <script>
 import { ebookMixin } from '@/utils/mixin.js'
-import { saveFontFamily, getFontFamily, getFontSize, saveFontSize } from '@/utils/localStorage'
+import { saveFontFamily, getFontFamily, getFontSize, saveFontSize, getTheme, saveTheme } from '@/utils/localStorage'
 import Epub from 'epubjs'
 global.ePub = Epub
 // nginx静态服务器的路径
@@ -56,6 +56,19 @@ export default {
       this.setSettingVisible(-1)
       this.setFontFamilyVisible(false)
     },
+    initTheme () {
+      let defaultTheme = getTheme(this.fileName)
+      if (!defaultTheme) {
+        defaultTheme = this.themeList[0].name
+        saveTheme(this.fileName, defaultTheme)
+      }
+      this.setDefaultTheme(defaultTheme)
+      this.themeList.forEach(theme => {
+        this.rendition.themes.register(theme.name, theme.style)
+      })
+      // defaultTheme 不从vuex获取，因为vuex是异步获取的。可能会获取不到
+      this.rendition.themes.select(defaultTheme)
+    },
     initFontSize () {
       let fontSize = getFontSize(this.fileName)
       if (!fontSize) {
@@ -88,6 +101,12 @@ export default {
       })
       // 对电子书进行展示
       this.rendition.display().then(() => {
+        // 初始化电子书主题
+        this.initTheme()
+
+        // 初始化全局样式主题
+        this.initGlobalStyle()
+
         // 初始化字体大小
         this.initFontSize()
 
