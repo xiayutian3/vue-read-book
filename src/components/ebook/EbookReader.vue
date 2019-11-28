@@ -87,12 +87,7 @@ export default {
         this.setDefaultFontFamily(font)
       }
     },
-    initEpub () {
-      // 拼接niginx静态电子书URL
-      const url = `${baseUrl}${this.fileName}.epub`
-      this.book = new Epub(url)
-      this.setCurrentBook(this.book)
-      // console.log(this.book)
+    initRendition () {
       // 渲染电子书
       this.rendition = this.book.renderTo('read', {
         width: window.innerWidth,
@@ -112,28 +107,6 @@ export default {
 
         // 初始化字体
         this.initFontFamily()
-      })
-
-      // 对电子书（通过iframe来加载）进行事件操作
-      this.rendition.on('touchstart', event => {
-        this.touchStartX = event.changedTouches[0].clientX
-        this.touchStartTime = event.timeStamp
-      })
-      this.rendition.on('touchend', event => {
-        const offsetX = event.changedTouches[0].clientX - this.touchStartX
-        const time = event.timeStamp - this.touchStartTime
-        // console.log(offsetX, time)
-        if (time > 200 && offsetX > 40) {
-          this.prevPage()
-        } else if (time > 200 && offsetX < -40) {
-          this.nextPage()
-        } else {
-          this.toggleTitleAndMenu()
-        }
-        // 禁止默认行为，禁止事件传播
-        // event.preventDefault() dom2 取消事件默认行为
-        event.stopPropagation()
-        return false // dom0 取消事件默认行为
       })
 
       // ebook阅读器通过ifram引用，通过hooks方法, 修改web字体，传入的是链接，而不是路径
@@ -157,6 +130,57 @@ export default {
         ]).then(() => {
           // console.log('字体加载完成后需要做点什么。。。')
         })
+      })
+    },
+
+    // 手势操作
+    initGesture () {
+      // 对电子书（通过iframe来加载）进行事件(手势操作)操作
+      this.rendition.on('touchstart', event => {
+        this.touchStartX = event.changedTouches[0].clientX
+        this.touchStartTime = event.timeStamp
+      })
+      this.rendition.on('touchend', event => {
+        const offsetX = event.changedTouches[0].clientX - this.touchStartX
+        const time = event.timeStamp - this.touchStartTime
+        // console.log(offsetX, time)
+        if (time > 200 && offsetX > 40) {
+          this.prevPage()
+        } else if (time > 200 && offsetX < -40) {
+          this.nextPage()
+        } else {
+          this.toggleTitleAndMenu()
+        }
+        // 禁止默认行为，禁止事件传播
+        // event.preventDefault() dom2 取消事件默认行为
+        event.stopPropagation()
+        return false // dom0 取消事件默认行为
+      })
+    },
+    initEpub () {
+      // 拼接niginx静态电子书URL
+      const url = `${baseUrl}${this.fileName}.epub`
+      this.book = new Epub(url)
+      this.setCurrentBook(this.book)
+      // console.log(this.book)
+
+      // 初始化rendition
+      this.initRendition()
+
+      // 初始化Gesture(手势操作)
+      this.initGesture()
+
+      // epub电子书解析全部结束后调用(钩子函数)
+      this.book.ready.then(() => {
+        // 一页显示的文字数量 默认是150个数一页，可以帮我们拿到 阅读的进度，做百分比
+        // 电子书分页
+        return this.book.locations.generate(750 * (window.innerWidth / 375) * (getFontSize(this.fileName) / 16))
+          .then(locations => {
+            // console.log(locations)
+
+            // 分页结束后，就可以设置电子书可用了
+            this.setBookAvailable(true)
+          })
       })
     }
   },
