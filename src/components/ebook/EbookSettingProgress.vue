@@ -43,16 +43,35 @@ export default {
     }
   },
   created () {},
-  mounted () {},
+  mounted () {
+    // 解决初始状态，进度条的背景颜色问题
+    this.updateProgressBg()
+  },
   computed: {},
   methods: {
     // 拖动松开手的方法
     onProgressChange (progress) {
-
+      this.setProgress(progress).then(() => {
+        this.displayProgress()
+        this.updateProgressBg()
+      })
     },
     // 拖动过程中的方法
-    onProgressInput (val) {
-
+    onProgressInput (progress) {
+      this.setProgress(progress).then(() => {
+        this.updateProgressBg()
+      })
+    },
+    // 显示进度条所在的页面
+    displayProgress () {
+      // 获取定位数据cfi  ,通过百分比来获取,传入小数
+      const cfi = this.currentBook.locations.cfiFromPercentage(this.progress / 100)
+      // console.log(cfi)
+      this.currentBook.rendition.display(cfi)
+    },
+    // 表示已读过的进度条颜色
+    updateProgressBg () {
+      this.$refs.progress.style.backgroundSize = `${this.progress}% 100%`
     },
     getReadTimeText () {
 
