@@ -76,11 +76,30 @@ export default {
     getReadTimeText () {
 
     },
+    // 下一章节
     nextSection () {
-
+      // 章节进度，里边有章节的信息
+      // console.log(this.currentBook.spine)
+      if (this.section < this.currentBook.spine.length - 1 && this.bookAvailable) {
+        this.setSection(this.section + 1).then(() => {
+          this.displaySection()
+        })
+      }
     },
+    // 返回上一章节
     prevSection () {
-
+      if (this.section > 0 && this.bookAvailable) {
+        this.setSection(this.section - 1).then(() => {
+          this.displaySection()
+        })
+      }
+    },
+    displaySection () {
+      const sectionInfo = this.currentBook.section(this.section)
+      if (sectionInfo && sectionInfo.href) {
+        // 展示相应的章节
+        this.currentBook.rendition.display(sectionInfo.href)
+      }
     }
   },
   components: {},
