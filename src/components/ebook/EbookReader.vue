@@ -6,7 +6,7 @@
 
 <script>
 import { ebookMixin } from '@/utils/mixin.js'
-import { saveFontFamily, getFontFamily, getFontSize, saveFontSize, getTheme, saveTheme } from '@/utils/localStorage'
+import { saveFontFamily, getFontFamily, getFontSize, saveFontSize, getTheme, saveTheme, getLocation } from '@/utils/localStorage'
 import Epub from 'epubjs'
 global.ePub = Epub
 // nginx静态服务器的路径
@@ -32,13 +32,19 @@ export default {
   methods: {
     prevPage () {
       if (this.rendition) {
-        this.rendition.prev()
+        this.rendition.prev().then(() => {
+          // 初始化阅读进度
+          this.refreshLocation()
+        })
         this.hideTitleAndMenu()
       }
     },
     nextPage () {
       if (this.rendition) {
-        this.rendition.next()
+        this.rendition.next().then(() => {
+          // 初始化阅读进度
+          this.refreshLocation()
+        })
         this.hideTitleAndMenu()
       }
     },
@@ -94,8 +100,11 @@ export default {
         height: window.innerHeight,
         methods: 'default'// 兼容微信
       })
-      // 对电子书进行展示
-      this.rendition.display().then(() => {
+      // 对电子书进行展示(刚开始没有阅读进度，所以传null)
+      const location = getLocation(this.fileName)
+      // console.log(location)
+      // 会自动判断location是否存在，不存在为null
+      this.display(location, () => {
         // 初始化电子书主题
         this.initTheme()
 
@@ -180,6 +189,9 @@ export default {
 
             // 分页结束后，就可以设置电子书可用了
             this.setBookAvailable(true)
+
+            // 分页完成后也调用一次refreshLocation，才能获取到 阅读进度(不然 refreshLocation方法中打印的progress为null)
+            this.refreshLocation()
           })
       })
     }

@@ -34,6 +34,7 @@
 
 <script>
 import { ebookMixin } from '@/utils/mixin'
+import { getReadTime } from '@/utils/localStorage'
 export default {
   name: '',
   mixins: [ebookMixin],
@@ -47,7 +48,21 @@ export default {
     // 解决初始状态，进度条的背景颜色问题
     this.updateProgressBg()
   },
-  computed: {},
+  computed: {
+    // 获取章节的名字
+    getSectionName () {
+      let textLabel = ''
+      if (this.section) {
+        const sectionInfo = this.currentBook.section(this.section)
+        if (sectionInfo && sectionInfo.href) {
+          // console.log(this.currentBook.navigation.get(sectionInfo.href))
+          // 通过导航获取章节目录
+          textLabel = this.currentBook.navigation.get(sectionInfo.href).label
+        }
+      }
+      return textLabel
+    }
+  },
   methods: {
     // 拖动松开手的方法
     onProgressChange (progress) {
@@ -67,14 +82,26 @@ export default {
       // 获取定位数据cfi  ,通过百分比来获取,传入小数
       const cfi = this.currentBook.locations.cfiFromPercentage(this.progress / 100)
       // console.log(cfi)
-      this.currentBook.rendition.display(cfi)
+      // this.currentBook.rendition.display(cfi).then(() => {
+      //   // 刷新进度百分比，保存进度
+      //   this.refreshLocation()
+      // })
+      // 也可以这样
+      this.display(cfi)
     },
     // 表示已读过的进度条颜色
     updateProgressBg () {
       this.$refs.progress.style.backgroundSize = `${this.progress}% 100%`
     },
+    // 显示阅读时间
     getReadTimeText () {
-
+      return this.$t('book.haveRead').replace('$1', this.getReadTimeByMinute())
+    },
+    // 转化为分钟
+    getReadTimeByMinute () {
+      const readTime = getReadTime(this.fileName)
+      if (!readTime) return 0
+      else return Math.ceil(readTime / 60)
     },
     // 下一章节
     nextSection () {
@@ -98,7 +125,11 @@ export default {
       const sectionInfo = this.currentBook.section(this.section)
       if (sectionInfo && sectionInfo.href) {
         // 展示相应的章节
-        this.currentBook.rendition.display(sectionInfo.href)
+        // this.currentBook.rendition.display(sectionInfo.href).then(() => {
+        //   this.refreshLocation()
+        // })
+        // 也可以这样（vuex中封装了）
+        this.display(sectionInfo.href)
       }
     }
   },
