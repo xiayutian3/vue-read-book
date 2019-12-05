@@ -56,12 +56,6 @@ export default {
       }
       this.setMenuVisible(!this.menuVisible)
     },
-    hideTitleAndMenu () {
-      // this.$store.dispatch('setMenuVisible', false)
-      this.setMenuVisible(false)
-      this.setSettingVisible(-1)
-      this.setFontFamilyVisible(false)
-    },
     initTheme () {
       let defaultTheme = getTheme(this.fileName)
       if (!defaultTheme) {

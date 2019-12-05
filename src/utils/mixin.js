@@ -104,6 +104,13 @@ export const ebookMixin = {
           if (callback) callback()
         })
       }
+    },
+    // 隐藏菜单栏内容
+    hideTitleAndMenu () {
+      // this.$store.dispatch('setMenuVisible', false)
+      this.setMenuVisible(false)
+      this.setSettingVisible(-1)
+      this.setFontFamilyVisible(false)
     }
   }
 }
