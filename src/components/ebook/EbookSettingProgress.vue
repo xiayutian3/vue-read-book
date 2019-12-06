@@ -34,7 +34,7 @@
 
 <script>
 import { ebookMixin } from '@/utils/mixin'
-import { getReadTime } from '@/utils/localStorage'
+
 export default {
   name: '',
   mixins: [ebookMixin],
@@ -92,16 +92,6 @@ export default {
     // 表示已读过的进度条颜色
     updateProgressBg () {
       this.$refs.progress.style.backgroundSize = `${this.progress}% 100%`
-    },
-    // 显示阅读时间
-    getReadTimeText () {
-      return this.$t('book.haveRead').replace('$1', this.getReadTimeByMinute())
-    },
-    // 转化为分钟
-    getReadTimeByMinute () {
-      const readTime = getReadTime(this.fileName)
-      if (!readTime) return 0
-      else return Math.ceil(readTime / 60)
     },
     // 下一章节
     nextSection () {
