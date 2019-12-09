@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import { flatten } from '@/utils/book'
 import { ebookMixin } from '@/utils/mixin.js'
 import { saveFontFamily, getFontFamily, getFontSize, saveFontSize, getTheme, saveTheme, getLocation } from '@/utils/localStorage'
 import Epub from 'epubjs'
@@ -21,7 +22,46 @@ export default {
 
     }
   },
-  created () {},
+  created () {
+    // 树状结构，需转化为一维数组，才好解析（例如）
+    // const nav = [
+    //   {
+    //     id: 1,
+    //     subitems: [
+    //       {
+    //         id: 2,
+    //         subitems: [
+    //           {
+    //             id: 3,
+    //             subitems: []
+    //           },
+    //           {
+    //             id: 4,
+    //             subitems: []
+    //           }
+    //         ]
+    //       }, {
+    //         id: 5,
+    //         subitems: []
+    //       }
+    //     ]
+    //   },
+    //   {
+    //     id: 6,
+    //     subitems: []
+    //   }
+    // ]
+    // console.log([0].concat(...[1, 2])) // [0,1,2]
+    // 采取递归操作，拍扁
+    // function flatten (array) {
+    //   // 二维数组
+    //   // return array.map(item => [].concat(item, ...flatten(item.subitems)))
+
+    //   // 一维数组
+    //   return [].concat(...array.map(item => [].concat(item, ...flatten(item.subitems))))
+    // }
+    // console.log(flatten(nav))
+  },
   mounted () {
     const fileName = this.$route.params.fileName.split('|').join('/')
     // console.log(`${baseUrl}${fileName}.epub`)
@@ -160,6 +200,81 @@ export default {
         return false // dom0 取消事件默认行为
       })
     },
+    parseBook () {
+      // 电子书正在加载的状态，获取封面信息,获取封面图片url,格式blog，一种资源文件
+      this.book.loaded.cover.then((cover) => {
+        this.book.archive.createUrl(cover).then((url) => {
+          // console.log(url)
+          this.setCover(url)
+        })
+      })
+      // 获取标题，作者信息等
+      this.book.loaded.metadata.then(metadata => {
+        this.setMetadata(metadata)
+      })
+      // 获取目录信息(树状结构的目录信息，可能有多级嵌套)
+      this.book.loaded.navigation.then(nav => {
+        let navItem = flatten(nav.toc)
+        navItem = flatten(navItem)
+        function find (item, level = 0) {
+          return !item.parent ? level : find(navItem.filter(parentItem => parentItem.id === item.parent)[0], ++level)
+        }
+
+        navItem.forEach(item => {
+          item.level = find(item)
+        })
+        console.log(navItem)
+        this.setNavigation(navItem)
+
+        // 实现树状目录结构（例子）
+        // let navigation = [
+        //   {
+        //     id: 1,
+        //     subitems: [
+        //       {
+        //         id: 2,
+        //         subitems: [
+        //           {
+        //             id: 3,
+        //             subitems: [],
+        //             parent: 2
+        //           },
+        //           {
+        //             id: 4,
+        //             subitems: [],
+        //             parent: 2
+        //           }
+        //         ],
+        //         parent: 1
+        //       }, {
+        //         id: 5,
+        //         subitems: [],
+        //         parent: 1
+        //       }
+        //     ],
+        //     parent: undefined
+        //   },
+        //   {
+        //     id: 6,
+        //     subitems: [],
+        //     parent: undefined
+        //   }
+        // ]
+        // navigation = flatten(navigation)
+        // function find (item, level = 0) {
+        //   if (!item.parent) {
+        //     return level
+        //   } else {
+        //     return find(navigation.filter(parentItem => parentItem.id === item.parent)[0], ++level)
+        //   }
+        // }
+
+        // navigation.forEach(item => {
+        //   item.level = find(item)
+        // })
+        // console.log(navigation)
+      })
+    },
     initEpub () {
       // 拼接niginx静态电子书URL
       const url = `${baseUrl}${this.fileName}.epub`
@@ -172,6 +287,9 @@ export default {
 
       // 初始化Gesture(手势操作)
       this.initGesture()
+
+      // 获取封面信息
+      this.parseBook()
 
       // epub电子书解析全部结束后调用(钩子函数)
       this.book.ready.then(() => {

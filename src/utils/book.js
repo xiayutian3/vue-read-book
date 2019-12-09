@@ -97,3 +97,12 @@ export function getReadTimeByMinute (fileName) {
   if (!readTime) return 0
   else return Math.ceil(readTime / 60)
 }
+
+// 树状结构转化为一维数组 , 采取递归操作，拍扁
+export function flatten (array) {
+  // 二维数组
+  // return array.map(item => [].concat(item, ...flatten(item.subitems)))
+
+  // 一维数组
+  return [].concat(...array.map(item => [].concat(item, ...flatten(item.subitems))))
+}

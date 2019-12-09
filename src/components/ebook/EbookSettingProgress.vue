@@ -54,7 +54,7 @@ export default {
       let textLabel = ''
       if (this.section) {
         const sectionInfo = this.currentBook.section(this.section)
-        if (sectionInfo && sectionInfo.href) {
+        if (sectionInfo && sectionInfo.href && this.currentBook && this.currentBook.navigation) {
           // console.log(this.currentBook.navigation.get(sectionInfo.href))
           // 通过导航获取章节目录
           textLabel = this.currentBook.navigation.get(sectionInfo.href).label

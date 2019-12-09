@@ -5,6 +5,7 @@
         <div class="content" v-if="settingVisible === 3">
           <div class="content-page-wrapper">
             <div class="content-page">
+              <!-- //动态组件 -->
               <component :is="currentTab === 1 ? content:bookmark"></component>
             </div>
             <div class="content-page-tab">

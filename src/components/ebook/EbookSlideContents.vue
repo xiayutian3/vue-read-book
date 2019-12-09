@@ -22,10 +22,10 @@
       </div>
       <div class="slide-contents-book-info-wrapper">
         <div class="slide-contents-book-title">
-          <span class="slide-contents-book-title-text"></span>
+          <span class="slide-contents-book-title-text">{{metadata.title}}</span>
         </div>
         <div class="slide-contents-book-author">
-          <span class="slide-contents-book-author-text"></span>
+          <span class="slide-contents-book-author-text">{{metadata.creator}}</span>
         </div>
       </div>
       <div class="slide-contents-book-progress-wrapper">
