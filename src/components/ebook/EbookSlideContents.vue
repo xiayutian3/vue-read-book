@@ -7,6 +7,7 @@
         </div>
         <input class="slide-contents-search-input"
                type="text"
+               v-model="searchText"
                :placeholder="$t('book.searchHint')"
                @click="showSearchPage">
       </div>
@@ -16,7 +17,7 @@
         {{$t('book.cancel')}}
       </div>
     </div>
-    <div class="slide-contents-book-wrapper">
+    <div class="slide-contents-book-wrapper" v-show="!searchVisible">
       <div class="slide-contents-book-img-wrapper">
         <img :src="cover" class="slide-contents-book-img">
       </div>
@@ -36,32 +37,100 @@
         <div class="slide-contents-book-time">{{getReadTimeText()}}</div>
       </div>
     </div>
+    <scroll class="slide-contents-list"
+            :top="156"
+            :bottom="48"
+            v-show="!searchVisible"
+            ref="scroll">
+      <div class="slide-contents-item" v-for="(item,index) in navigation" :key="index">
+        <span class="slide-contents-item-label" @click="displayNavigation(item.href)" :class="{selected:section === index}" :style="contentItemStyle(item)">{{item.label}}</span>
+        <span class="slide-contents-item-page"></span>
+      </div>
+    </scroll>
+    <scroll class="slide-search-list"
+            :top="66"
+            :bottom="48"
+            v-show="searchVisible">
+      <div class="slide-search-item" v-for="(item,index) in searchList" :key="index">
+        {{item.excerpt}}
+      </div>
+    </scroll>
   </div>
 </template>
 
 <script>
 import { ebookMixin } from '@/utils/mixin'
+import Scroll from '@/components/common/Scroll'
+import { px2rem } from '@/utils/utils'
 export default {
   name: '',
   mixins: [ebookMixin],
   props: {},
   data () {
     return {
-      searchVisible: false
+      searchVisible: false,
+      searchList: null,
+      searchText: ''
     }
   },
   created () {},
-  mounted () {},
+  mounted () {
+    this.currentBook.ready.then(() => {
+    // 通过异步来返回结果 (数组)
+      this.doSearch('added').then(results => {
+        this.searchList = results
+      })
+
+      // 获取到section（section管理文本）
+      // this.currentBook.spine.spineItems.map(item => console.log(item))
+
+      // 数组降维（二维数组价位一维数组）
+      // const a = [1, 2, 3]
+      // const b = [4, 5, 6]
+      // console.log([].concat(a, b))
+      // const c = [[1, 2, 3], [4, 5, 6]]
+      // let arr = [].concat.apply(1, c) // [1,1,2,3,4,5,6]
+      // console.log(arr.shift()) // Number{1}
+      // console.log(arr) // [1,2,3,4,5,6]
+      // // 换个更优雅的方法
+      // console.log([].concat.apply([], c)) // [1, 2, 3, 4, 5, 6]
+    })
+  },
   computed: {},
   methods: {
+    // 全文搜索实现
+    doSearch (q) {
+      return Promise.all(
+        this.currentBook.spine.spineItems.map(section => section.load(this.currentBook.load.bind(this.currentBook)) // 获取全文
+          .then(section.find.bind(section, q)) // 全文查找
+          .finally(section.unload.bind(section))) // 最后释放资源（因为占用内存）
+      ).then(results => Promise.resolve([].concat.apply([], results))) // 多维数组降维 变成一维数组
+    },
+    displayNavigation (target) {
+      this.display(target, () => {
+        // 当点击左侧菜单目录，隐藏菜单
+        this.hideTitleAndMenu()
+      })
+    },
     showSearchPage () {
       this.searchVisible = true
     },
     hideSearchPage () {
       this.searchVisible = false
+      this.searchList = null
+      this.searchText = ''
+    },
+    contentItemStyle (item) {
+      return {
+        // marginLeft: `${px2rem(item.level * 15)}rem`
+        // 也可以一下面这样
+        'margin-left': `${px2rem(item.level * 15)}rem`
+      }
     }
   },
-  components: {},
+  components: {
+    Scroll
+  },
   watch: {}
 }
 </script>

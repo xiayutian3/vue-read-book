@@ -51,16 +51,20 @@ export default {
   computed: {
     // 获取章节的名字
     getSectionName () {
-      let textLabel = ''
-      if (this.section) {
-        const sectionInfo = this.currentBook.section(this.section)
-        if (sectionInfo && sectionInfo.href && this.currentBook && this.currentBook.navigation) {
-          // console.log(this.currentBook.navigation.get(sectionInfo.href))
-          // 通过导航获取章节目录
-          textLabel = this.currentBook.navigation.get(sectionInfo.href).label
-        }
-      }
-      return textLabel
+      // let textLabel = ''
+      // if (this.section) {
+      //   const sectionInfo = this.currentBook.section(this.section)
+      //   if (sectionInfo && sectionInfo.href && this.currentBook && this.currentBook.navigation) {
+      //     // console.log(this.currentBook.navigation.get(sectionInfo.href))
+      //     // 通过导航获取章节目录
+      //     // 该方法只能获取一级目录，如果有二级目录就会没有用
+      //     textLabel = this.currentBook.navigation.get(sectionInfo.href).label
+      //   }
+      // }
+      // return textLabel
+
+      // 可以解决有二级或多级目录问题（进度条地下的名字对应问题）
+      return this.section ? this.navigation[this.section].label : ''
     }
   },
   methods: {
@@ -100,6 +104,7 @@ export default {
       if (this.section < this.currentBook.spine.length - 1 && this.bookAvailable) {
         this.setSection(this.section + 1).then(() => {
           this.displaySection()
+          this.updateProgressBg()
         })
       }
     },
@@ -108,6 +113,7 @@ export default {
       if (this.section > 0 && this.bookAvailable) {
         this.setSection(this.section - 1).then(() => {
           this.displaySection()
+          this.updateProgressBg()
         })
       }
     },

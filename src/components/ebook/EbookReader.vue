@@ -223,7 +223,7 @@ export default {
         navItem.forEach(item => {
           item.level = find(item)
         })
-        console.log(navItem)
+        // console.log(navItem)
         this.setNavigation(navItem)
 
         // 实现树状目录结构（例子）
