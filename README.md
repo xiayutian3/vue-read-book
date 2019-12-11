@@ -1,4 +1,8 @@
-# ccc
+# vue-read-book
+1.打开本地nginx服务器
+2.运行项目 npm run serve
+3.输入地址（例如）localhost 或者IP
+http://localhost:8080/#/ebook/History|2018_Book_GlobalHistoryAndNewPolycentric
 
 ## Project setup
 ```

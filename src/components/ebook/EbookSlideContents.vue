@@ -9,6 +9,7 @@
                type="text"
                v-model="searchText"
                :placeholder="$t('book.searchHint')"
+               @keyup.enter.exact="search"
                @click="showSearchPage">
       </div>
       <div class="slide-contents-search-cancel"
@@ -52,7 +53,7 @@
             :bottom="48"
             v-show="searchVisible">
       <div class="slide-search-item" v-for="(item,index) in searchList" :key="index">
-        {{item.excerpt}}
+        <span v-html="item.excerpt" @click="displayNavigation(item.cfi,true)"></span>
       </div>
     </scroll>
   </div>
@@ -75,26 +76,26 @@ export default {
   },
   created () {},
   mounted () {
-    this.currentBook.ready.then(() => {
+    // this.currentBook.ready.then(() => {
     // 通过异步来返回结果 (数组)
-      this.doSearch('added').then(results => {
-        this.searchList = results
-      })
+    // this.doSearch('added').then(results => {
+    //   this.searchList = results
+    // })
 
-      // 获取到section（section管理文本）
-      // this.currentBook.spine.spineItems.map(item => console.log(item))
+    // 获取到section（section管理文本）
+    // this.currentBook.spine.spineItems.map(item => console.log(item))
 
-      // 数组降维（二维数组价位一维数组）
-      // const a = [1, 2, 3]
-      // const b = [4, 5, 6]
-      // console.log([].concat(a, b))
-      // const c = [[1, 2, 3], [4, 5, 6]]
-      // let arr = [].concat.apply(1, c) // [1,1,2,3,4,5,6]
-      // console.log(arr.shift()) // Number{1}
-      // console.log(arr) // [1,2,3,4,5,6]
-      // // 换个更优雅的方法
-      // console.log([].concat.apply([], c)) // [1, 2, 3, 4, 5, 6]
-    })
+    // 数组降维（二维数组价位一维数组）
+    // const a = [1, 2, 3]
+    // const b = [4, 5, 6]
+    // console.log([].concat(a, b))
+    // const c = [[1, 2, 3], [4, 5, 6]]
+    // let arr = [].concat.apply(1, c) // [1,1,2,3,4,5,6]
+    // console.log(arr.shift()) // Number{1}
+    // console.log(arr) // [1,2,3,4,5,6]
+    // // 换个更优雅的方法
+    // console.log([].concat.apply([], c)) // [1, 2, 3, 4, 5, 6]
+    // })
   },
   computed: {},
   methods: {
@@ -106,10 +107,15 @@ export default {
           .finally(section.unload.bind(section))) // 最后释放资源（因为占用内存）
       ).then(results => Promise.resolve([].concat.apply([], results))) // 多维数组降维 变成一维数组
     },
-    displayNavigation (target) {
+    displayNavigation (target, highlight = false) {
       this.display(target, () => {
         // 当点击左侧菜单目录，隐藏菜单
         this.hideTitleAndMenu()
+        // 内容高亮显示关键字
+        if (highlight) {
+          // annotations 专门管理高亮的元素
+          this.currentBook.rendition.annotations.highlight(target)
+        }
       })
     },
     showSearchPage () {
@@ -126,7 +132,24 @@ export default {
         // 也可以一下面这样
         'margin-left': `${px2rem(item.level * 15)}rem`
       }
+    },
+    search () {
+      if (this.searchText && this.searchText.length > 0) {
+        this.doSearch(this.searchText).then(results => {
+          this.searchList = results
+          this.searchList.map(item => {
+            // 应该是返回item对象 不是item.excerpt
+            item.excerpt = item.excerpt.replace(this.searchText, `<span class="content-search-text">${this.searchText}</span>`)
+            return item
+          })
+        })
+      }
     }
+    // displaySearch (cfi) {
+    //   this.display(cfi, () => {
+    //     this.hideTitleAndMenu()
+    //   })
+    // }
   },
   components: {
     Scroll
