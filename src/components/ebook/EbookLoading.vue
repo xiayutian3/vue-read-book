@@ -3,8 +3,8 @@
     <div class="ebook-loading-wrapper">
       <div class="ebook-loading-item" v-for="(item,index) in data" :key="index">
         <div class="ebook-loading-line-wrapper" v-for="(subItem,subIndex) in item" :key="subIndex">
-          <div class="ebook-loading-line"></div>
-          <div class="ebook-loading-mask"></div>
+          <div class="ebook-loading-line" ref="line"></div>
+          <div class="ebook-loading-mask" ref="mask"></div>
         </div>
       </div>
       <div class="ebook-loading-center"></div>
@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import { px2rem } from '@/utils/utils'
 export default {
   name: '',
   props: {},
@@ -21,11 +22,85 @@ export default {
       data: [
         [{}, {}, {}],
         [{}, {}, {}]
-      ]
+      ],
+      maskWidth: [
+        { value: 0 },
+        { value: 0 },
+        { value: 0 },
+        { value: 0 },
+        { value: 0 },
+        { value: 0 }
+      ],
+      lineWidth: [
+        { value: 16 },
+        { value: 16 },
+        { value: 16 },
+        { value: 16 },
+        { value: 16 },
+        { value: 16 }
+      ],
+      add: true,
+      end: false
     }
   },
   created () {},
-  mounted () {},
+  mounted () {
+    this.tsak = setInterval(() => {
+      this.$refs.mask.forEach((item, index) => {
+        const mask = this.$refs.mask[index]
+        const line = this.$refs.line[index]
+        let maskWidth = this.maskWidth[index]
+        let lineWidth = this.lineWidth[index]
+        // 上一条到达一半后，下一条开始运动
+        if (index === 0) {
+          if (this.add && maskWidth.value < 16) {
+            maskWidth.value++
+            lineWidth.value--
+          } else if (!this.add && lineWidth.value < 16) {
+            maskWidth.value--
+            lineWidth.value++
+          }
+        } else {
+          if (this.add && maskWidth.value < 16) {
+            let preMaskWidth = this.maskWidth[index - 1]
+            if (preMaskWidth.value >= 8) {
+              maskWidth.value++
+              lineWidth.value--
+            }
+          } else if (!this.add && lineWidth.value < 16) {
+            let preLineWidth = this.lineWidth[index - 1]
+            if (preLineWidth.value >= 8) {
+              maskWidth.value--
+              lineWidth.value++
+            }
+          }
+        }
+
+        // 一个修改width ，一个修改flex（老师那里写的是两个值） 而我只写了一个值
+        mask.style.width = `${px2rem(maskWidth.value)}rem`
+        mask.style.flex = `0 0 ${px2rem(maskWidth.value)}rem`
+        line.style.width = `${px2rem(lineWidth.value)}rem`
+        line.style.flex = `0 0 ${px2rem(lineWidth.value)}rem`
+
+        // 判断条件
+        if (index === this.maskWidth.length - 1) {
+          if (this.add) {
+            if (maskWidth.value === 16) {
+              this.end = true
+            }
+          } else {
+            if (maskWidth.value === 0) {
+              this.end = true
+            }
+          }
+        }
+        if (this.end) {
+          this.add = !this.add
+          this.end = false
+        }
+      })
+    }, 20)
+  },
   computed: {},
   methods: {},
   components: {},
