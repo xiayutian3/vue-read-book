@@ -45,7 +45,7 @@
             ref="scroll">
       <div class="slide-contents-item" v-for="(item,index) in navigation" :key="index">
         <span class="slide-contents-item-label" @click="displayNavigation(item.href)" :class="{selected:section === index}" :style="contentItemStyle(item)">{{item.label}}</span>
-        <span class="slide-contents-item-page"></span>
+        <span class="slide-contents-item-page">{{item.page}}</span>
       </div>
     </scroll>
     <scroll class="slide-search-list"
