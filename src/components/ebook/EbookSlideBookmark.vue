@@ -1,22 +1,45 @@
 <template>
   <div class="ebook-slide-bookmark">
-    <span> 1234dgfdgffd</span>
+    <div class="slide-bookmark-title">{{$t('book.bookmark')}} 路 {{bookmark ? bookmark.length : 0}}</div>
+    <scroll class="slide-bookmark-list" :top="48" :bottom="48">
+      <div class="slide-bookmark-item" v-for="(item, index) in bookmark" :key="index" @click="displayBookmark(item.cfi)">
+        <div class="slide-bookmark-item-icon">
+          <div class="icon-bookmark"></div>
+        </div>
+        <div class="slide-bookmark-item-text">{{item.text}}</div>
+      </div>
+    </scroll>
   </div>
 </template>
 
 <script>
+import { getBookmark } from '@/utils/localStorage'
+import { ebookMixin } from '@/utils/mixin'
+import Scroll from '@/components/common/Scroll'
 export default {
   name: '',
+  mixins: [ebookMixin],
   props: {},
   data () {
     return {
+      bookmark: null
     }
   },
   created () {},
-  mounted () {},
+  mounted () {
+    this.bookmark = getBookmark(this.fileName)
+  },
   computed: {},
-  methods: {},
-  components: {},
+  methods: {
+    displayBookmark (target) {
+      this.display(target, () => {
+        this.hideTitleAndMenu()
+      })
+    }
+  },
+  components: {
+    Scroll
+  },
   watch: {}
 }
 </script>

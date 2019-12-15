@@ -16,6 +16,7 @@
 import { realPx } from '@/utils/utils'
 import Bookmark from '@/components/common/Bookmark.vue'
 import { ebookMixin } from '@/utils/mixin'
+import { getBookmark, saveBookmark } from '@/utils/localStorage'
 const BLUE = '#346cbc'
 const WHITE = '#fff'
 export default {
@@ -30,13 +31,7 @@ export default {
     }
   },
   created () {},
-  mounted () {
-    setTimeout(() => {
-      console.log('w', window.innerWidth)
-      console.log('b', this.$refs.bookmark.clientWidth)
-      console.log((window.innerWidth - this.$refs.bookmark.clientWidth) / 2)
-    }, 1000)
-  },
+  mounted () {},
   computed: {
     // 第一阶段，随者下拉往下走
     // 第二阶段高度，吸顶效果的临界值（下拉到多少的时候，吸顶，不再往下走）
@@ -56,11 +51,58 @@ export default {
     }
   },
   methods: {
+    // 电子书的cfi：(例如)
+    // {
+    //   start:{
+    //     cfi: "epubcfi(/6/12[A416799_1_En_2_Chapter]!/4/8/2[Sec1]/4[Par2]/9:3)",
+    //     ...,
+    //     href: "A416799_1_En_2_Chapter.html"
+    //   },
+    //   end:{
+    //     cfi: "epubcfi(/6/12[A416799_1_En_2_Chapter]!/4/2/2[Chap2]/2/1:0)",
+    //     ...,
+    //     href: "A416799_1_En_2_Chapter.html"
+    //   }
+    // }
+
+    // 添加书签
     addBookmark () {
+      // 获取该电子书所有的书签
+      this.bookmark = getBookmark(this.fileName)
+      if (!this.bookmark) {
+        this.bookmark = []
+      }
 
+      const currentLocation = this.currentBook.rendition.currentLocation()
+      // 匹配 ！号后边的部分
+      const cfibase = currentLocation.start.cfi.replace(/!.*/, '')
+      // 匹配 ！号前边的部分，和 匹配任何结尾为 ）的字符串
+      const cfistart = currentLocation.start.cfi.replace(/.*!/, '').replace(/\)$/, '')
+      const cfiend = currentLocation.end.cfi.replace(/.*!/, '').replace(/\)$/, '')
+      // console.log(cfibase, cfistart, cfiend)
+      // cfi范围
+      const cfirange = `${cfibase}!,${cfistart},${cfiend})`
+      // 调用电子书的范围方法获取内容
+      this.currentBook.getRange(cfirange).then(range => {
+        // 去掉文本中多余空格
+        const text = range.toString().replace(/\s\s/g, '')
+        this.bookmark.push({
+          cfi: currentLocation.start.cfi,
+          text: text
+        })
+        saveBookmark(this.fileName, this.bookmark)
+      })
     },
+    // 删除书签
     removeBookmark () {
-
+      const currentLocation = this.currentBook.rendition.currentLocation()
+      const cfi = currentLocation.start.cfi
+      this.bookmark = getBookmark(this.fileName)
+      if (this.bookmark) {
+        saveBookmark(this.fileName, this.bookmark.filter(item => item.cfi !== cfi))
+      }
+      // 当前页已经不是书签了
+      this.setIsBookmark(false)
     },
     // 重置操作（状态4）
     restore () {
@@ -167,6 +209,16 @@ export default {
         // （状态4）
         // （做一些重置的操作）
         this.restore()
+      }
+    },
+    // 判断当前页是否是书签
+    isBookmark (isBookmark) {
+      // 因为 isFixed 和 isBookmark 值一样，所以直接这样设置
+      this.isFixed = isBookmark
+      if (isBookmark) {
+        this.color = BLUE
+      } else {
+        this.color = WHITE
       }
     }
   }

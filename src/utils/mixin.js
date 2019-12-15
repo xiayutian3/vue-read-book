@@ -1,6 +1,6 @@
 import { mapGetters, mapActions } from 'vuex'
 import { themeList, addCss, removeAllCss, getReadTimeByMinute } from '@/utils/book'
-import { saveLocation } from '@/utils/localStorage'
+import { saveLocation, getBookmark } from '@/utils/localStorage'
 
 export const ebookMixin = {
   computed: {
@@ -77,10 +77,10 @@ export const ebookMixin = {
           break
       }
     },
-    // 更新当前的进度和保存当前的阅读进度
+    // 更新当前的进度和保存当前的阅读进度(电子书的cfi)
     refreshLocation () {
       const currentLocation = this.currentBook.rendition.currentLocation()
-
+      // console.log(currentLocation)
       if (currentLocation && currentLocation.start) {
         const startCfi = currentLocation.start.cfi
         // 获取进度
@@ -90,6 +90,19 @@ export const ebookMixin = {
         // console.log(currentLocation)
         this.setSection(currentLocation.start.index)
         saveLocation(this.fileName, startCfi)
+
+        // 判断当前页是不是书签
+        const bookmark = getBookmark(this.fileName)
+        // console.log(bookmark)
+        if (bookmark) {
+          if (bookmark.some(item => item.cfi === startCfi)) {
+            this.setIsBookmark(true)
+          } else {
+            this.setIsBookmark(false)
+          }
+        } else {
+          this.setIsBookmark(false)
+        }
       }
     },
     // 渲染阅读进度（传入href，或者cfi都可以 EbookSettingProgress.vue中都使用了 ），所在的页面的方法
