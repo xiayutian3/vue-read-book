@@ -91,7 +91,7 @@ export const ebookMixin = {
         this.setSection(currentLocation.start.index)
         saveLocation(this.fileName, startCfi)
 
-        // 判断当前页是不是书签
+        // 判断当前页是不是书签（获取本地书签页保存的数组）
         const bookmark = getBookmark(this.fileName)
         // console.log(bookmark)
         if (bookmark) {

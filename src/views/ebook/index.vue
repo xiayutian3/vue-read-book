@@ -1,13 +1,17 @@
 <template>
   <div class="ebook" ref="ebook">
+    <ebook-header></ebook-header>
     <ebook-title></ebook-title>
     <ebook-reader></ebook-reader>
     <ebook-menu></ebook-menu>
     <ebook-bookmark></ebook-bookmark>
+    <ebook-footer></ebook-footer>
   </div>
 </template>
 
 <script>
+import EbookFooter from '@/components/ebook/EbookFooter.vue'
+import EbookHeader from '@/components/ebook/EbookHeader.vue'
 import EbookReader from '@/components/ebook/EbookReader.vue'
 import EbookTitle from '@/components/ebook/EbookTitle.vue'
 import EbookMenu from '@/components/ebook/EbookMenu.vue'
@@ -65,7 +69,9 @@ export default {
     EbookReader,
     EbookMenu,
     EbookTitle,
-    EbookBookmark
+    EbookBookmark,
+    EbookHeader,
+    EbookFooter
   },
   watch: {
     offsetY (v) {

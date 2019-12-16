@@ -5,6 +5,9 @@
         @click="onMaskClick"
         @touchmove="move"
         @touchend="moveEnd"
+        @mousedown.left="onMouseEnter"
+        @mousemove.left="onMouseMove"
+        @mouseup.left="onMouseEnd"
         ></div>
   </div>
 </template>
@@ -75,6 +78,57 @@ export default {
     })
   },
   methods: {
+    // pc端（实现鼠标的下拉事件）
+    // 1 - 鼠标进入
+    // 2 - 鼠标进入后的移动
+    // 3 - 鼠标从移动状态松手
+    // 4 - 鼠标还原
+    onMouseEnter (e) {
+      // 记录点击的时间，用户误操作，点击，移动了一点点，再松开手，界面没反应（目的是让界面有反应，优化，）
+      this.mouseStartTime = e.timeStamp
+
+      this.mouseState = 1
+      e.preventDefault()
+      e.stopPropagation()
+      return false
+    },
+    onMouseMove (e) {
+      if (this.mouseState === 1) {
+        this.mouseState = 2
+      } else if (this.mouseState === 2) {
+        let offsetY = 0
+        if (this.firstOffsetY) {
+          offsetY = e.clientY - this.firstOffsetY
+          this.setOffsetY(offsetY)
+        } else {
+          this.firstOffsetY = e.clientY
+        }
+      }
+      e.preventDefault()
+      e.stopPropagation()
+      return false
+    },
+    onMouseEnd (e) {
+      if (this.mouseState === 2) {
+        // 做重置操作
+        this.setOffsetY(0)
+        this.firstOffsetY = null
+        // 不把状态值为 move时间还在移动，还在触发
+        this.mouseState = 3
+      } else {
+        // 状态4 点击然后松开，没事，没有影响，
+        this.mouseState = 4
+      }
+      // 记录时间(小于200毫秒，也认为是点击事件)
+      const time = e.timeStamp - this.timeStamp
+      if (time < 200) {
+        this.mouseState = 4
+      }
+
+      e.preventDefault()
+      e.stopPropagation()
+      return false
+    },
     move (e) {
       let offsetY = 0
       if (this.firstOffsetY) {
@@ -94,6 +148,10 @@ export default {
       this.firstOffsetY = null
     },
     onMaskClick (e) {
+      // pc鼠标事件
+      if (this.mouseState && (this.mouseState === 2 || this.mouseState === 3)) {
+        return
+      }
       const offsetX = e.offsetX
       const width = window.innerWidth
       if (offsetX > 0 && offsetX < width * 0.3) {
@@ -166,7 +224,9 @@ export default {
       this.rendition = this.book.renderTo('read', {
         width: window.innerWidth,
         height: window.innerHeight,
-        methods: 'default'// 兼容微信
+        methods: 'default'// 兼容微信(默认模式)
+        // flow: 'scrolled' // 上下滚动模式（兼容性不好，微信，苹果浏览器不支持2019/12/16）
+
       })
       // 对电子书进行展示(刚开始没有阅读进度，所以传null)
       const location = getLocation(this.fileName)
