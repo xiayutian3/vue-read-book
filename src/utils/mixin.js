@@ -103,6 +103,20 @@ export const ebookMixin = {
         } else {
           this.setIsBookmark(false)
         }
+
+        // 页脚分页显示
+        if (this.pagelist) {
+          const totalPage = this.pagelist.length
+          console.log(currentLocation)
+          const currentPage = currentLocation.start.location
+          if (currentPage && currentPage > 0) {
+            this.setPaginate(currentPage + ' / ' + totalPage)
+          } else {
+            this.setPaginate('')
+          }
+        } else {
+          this.setPaginate('')
+        }
       }
     },
     // 渲染阅读进度（传入href，或者cfi都可以 EbookSettingProgress.vue中都使用了 ），所在的页面的方法

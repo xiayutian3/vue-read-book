@@ -391,7 +391,36 @@ export default {
         // 电子书分页
         return this.book.locations.generate(750 * (window.innerWidth / 375) * (getFontSize(this.fileName) / 16))
           .then(locations => {
-            // console.log(locations)
+            // console.log(locations, this.navigation) // 数组
+            // 做个简单页脚
+            // 初始化
+            this.navigation.forEach(nav => {
+              nav.pagelist = []
+            })
+            // 将locations对应到目录中
+            locations.forEach(item => {
+              // 例如：["[A416799_1_En_BookBackmatter_OnlinePDF]!","A416799_1_En_BookBackmatter_OnlinePDF"]
+              const loc = item.match(/\[(.*)\]!/)[1]
+              this.navigation.forEach(nav => {
+                if (nav.href) {
+                  const href = nav.href.match(/^(.*)\.html$/)[1]
+                  if (href === loc) {
+                    nav.pagelist.push(item)
+                  }
+                }
+              })
+              let currentPage = 1
+              this.navigation.forEach((nav, index) => {
+                if (index === 0) {
+                  nav.page = 1
+                } else {
+                  nav.page = currentPage
+                }
+                currentPage += nav.pagelist.length + 1
+              })
+            })
+            // 为了获取总页数
+            this.setPagelist(locations)
 
             // 分页结束后，就可以设置电子书可用了
             this.setBookAvailable(true)
