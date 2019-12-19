@@ -1,5 +1,5 @@
 <template>
-  <div class="search-bar" :class="{'hide-title':!titleVisible}">
+  <div class="search-bar" :class="{'hide-title':!titleVisible,'hide-shadow':!shadowVisible}">
     <transition name="title-move">
       <div class="search-bar-title-wrapper" v-show="titleVisible">
         <div class="title-text-wrapper">
@@ -10,10 +10,11 @@
         </div>
       </div>
     </transition>
-    <div class="title-icon-back-wrapper">
+    <div class="title-icon-back-wrapper" :class="{'hide-title':!titleVisible}">
       <span class="icon-back icon"></span>
     </div>
     <div class="search-bar-input-wrapper" :class="{'hide-title':!titleVisible}">
+      <div class="search-bar-blank" :class="{'hide-title':!titleVisible}"></div>
       <div class="search-bar-input">
         <span class="icon-search icon"></span>
         <input type="text" class="input" :placeholder="$t('home.hint')" v-model="searchText">
@@ -31,7 +32,8 @@ export default {
   data () {
     return {
       searchText: '',
-      titleVisible: true
+      titleVisible: true,
+      shadowVisible: false
     }
   },
   created () {},
@@ -43,6 +45,12 @@ export default {
     },
     showTitle () {
       this.titleVisible = true
+    },
+    hideShadow () {
+      this.shadowVisible = false
+    },
+    showShadow () {
+      this.shadowVisible = true
     }
   },
   components: {},
@@ -50,8 +58,10 @@ export default {
     offsetY (offsetY) {
       if (offsetY > 0) {
         this.hideTitle()
+        this.showShadow()
       } else {
         this.showTitle()
+        this.hideShadow()
       }
     }
   }

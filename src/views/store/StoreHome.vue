@@ -1,7 +1,7 @@
 <template>
   <div class="store-home">
     <search-bar></search-bar>
-    <scroll :top="94" @onScroll="onScroll">
+    <scroll :top="scrollTop" @onScroll="onScroll" ref="scroll">
     <div>1111</div>
       <div>1111</div>
         <div>1111</div>
@@ -39,6 +39,7 @@ export default {
   props: {},
   data () {
     return {
+      scrollTop: 94
     }
   },
   created () {},
@@ -47,6 +48,13 @@ export default {
   methods: {
     onScroll (offsetY) {
       this.setOffsetY(offsetY)
+      if (offsetY > 0) {
+        this.scrollTop = 52
+      } else {
+        this.scrollTop = 94
+      }
+      // 从新计算滚动列表高度
+      this.$refs.scroll.refresh()
     }
   },
   components: {
