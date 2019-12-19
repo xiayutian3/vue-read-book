@@ -1,17 +1,19 @@
 <template>
-  <div class="search-bar">
-    <div class="search-bar-title-wrapper">
-      <div class="title-icon-back-wrapper">
-        <span class="icon-back icon"></span>
+  <div class="search-bar" :class="{'hide-title':!titleVisible}">
+    <transition name="title-move">
+      <div class="search-bar-title-wrapper" v-show="titleVisible">
+        <div class="title-text-wrapper">
+          <div class="title-text title">{{$t('home.title')}}</div>
+        </div>
+        <div class="title-icon-shake-wrapper">
+          <span class="icon-shake icon"></span>
+        </div>
       </div>
-      <div class="title-text-wrapper">
-        <div class="title-text title">{{$t('home.title')}}</div>
-      </div>
-      <div class="title-icon-shake-wrapper">
-        <span class="icon-shake icon"></span>
-      </div>
+    </transition>
+    <div class="title-icon-back-wrapper">
+      <span class="icon-back icon"></span>
     </div>
-    <div class="search-bar-input-wrapper">
+    <div class="search-bar-input-wrapper" :class="{'hide-title':!titleVisible}">
       <div class="search-bar-input">
         <span class="icon-search icon"></span>
         <input type="text" class="input" :placeholder="$t('home.hint')" v-model="searchText">
@@ -21,20 +23,38 @@
 </template>
 
 <script>
+import { storeHomeMixin } from '@/utils/mixin'
 export default {
   name: '',
+  mixins: [storeHomeMixin],
   props: {},
   data () {
     return {
-      searchText: ''
+      searchText: '',
+      titleVisible: true
     }
   },
   created () {},
   mounted () {},
   computed: {},
-  methods: {},
+  methods: {
+    hideTitle () {
+      this.titleVisible = false
+    },
+    showTitle () {
+      this.titleVisible = true
+    }
+  },
   components: {},
-  watch: {}
+  watch: {
+    offsetY (offsetY) {
+      if (offsetY > 0) {
+        this.hideTitle()
+      } else {
+        this.showTitle()
+      }
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>

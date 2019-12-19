@@ -2,6 +2,17 @@ import { mapGetters, mapActions } from 'vuex'
 import { themeList, addCss, removeAllCss, getReadTimeByMinute } from '@/utils/book'
 import { saveLocation, getBookmark } from '@/utils/localStorage'
 
+// 和图书界面相关的mixin
+export const storeHomeMixin = {
+  computed: {
+    ...mapGetters(['offsetY'])
+  },
+  methods: {
+    ...mapActions(['setOffsetY'])
+  }
+}
+
+// 和阅读器相关的mixin
 export const ebookMixin = {
   computed: {
     ...mapGetters([
@@ -107,7 +118,7 @@ export const ebookMixin = {
         // 页脚分页显示
         if (this.pagelist) {
           const totalPage = this.pagelist.length
-          console.log(currentLocation)
+          // console.log(currentLocation)
           const currentPage = currentLocation.start.location
           if (currentPage && currentPage > 0) {
             this.setPaginate(currentPage + ' / ' + totalPage)

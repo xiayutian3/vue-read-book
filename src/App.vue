@@ -25,7 +25,7 @@
 export default {
   // computed: {
   // ...mapGetters(['test']),
-  // ...fn(['a', 'b', 'c'])
+  //   ...fn(['a', 'b', 'c'])
   // },
   // mounted () {
   // console.log(this.test)

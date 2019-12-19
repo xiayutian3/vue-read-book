@@ -1,13 +1,41 @@
 <template>
   <div class="store-home">
     <search-bar></search-bar>
+    <scroll :top="94" @onScroll="onScroll">
+    <div>1111</div>
+      <div>1111</div>
+        <div>1111</div>
+          <div>1111</div>
+            <div>1111</div>
+              <div>1111</div>
+               <div>1111</div>
+                <div>1111</div>
+                  <div>1111</div>
+                    <div>1111</div>
+                      <div>1111</div>
+                        <div>1111</div>
+                        <div>1111</div>
+                            <div>1111</div>
+              <div>1111</div>
+               <div>1111</div>
+              <div>1111</div>
+                <div>1111</div>
+                  <div>1111</div>
+                    <div>1111</div>
+                      <div>1111</div>
+                      <div>1111</div>
+
+    </scroll>
   </div>
 </template>
 
 <script>
 import SearchBar from '@/components/home/SearchBar.vue'
+import Scroll from '@/components/common/Scroll.vue'
+import { storeHomeMixin } from '@/utils/mixin'
 export default {
   name: '',
+  mixins: [storeHomeMixin],
   props: {},
   data () {
     return {
@@ -16,9 +44,14 @@ export default {
   created () {},
   mounted () {},
   computed: {},
-  methods: {},
+  methods: {
+    onScroll (offsetY) {
+      this.setOffsetY(offsetY)
+    }
+  },
   components: {
-    SearchBar
+    SearchBar,
+    Scroll
   },
   watch: {}
 }
