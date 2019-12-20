@@ -1,4 +1,5 @@
 <template>
+<div>
   <div class="search-bar" :class="{'hide-title':!titleVisible,'hide-shadow':!shadowVisible}">
     <transition name="title-move">
       <div class="search-bar-title-wrapper" v-show="titleVisible">
@@ -10,21 +11,30 @@
         </div>
       </div>
     </transition>
-    <div class="title-icon-back-wrapper" :class="{'hide-title':!titleVisible}">
+    <div class="title-icon-back-wrapper" :class="{'hide-title':!titleVisible}" @click="back">
       <span class="icon-back icon"></span>
     </div>
     <div class="search-bar-input-wrapper" :class="{'hide-title':!titleVisible}">
       <div class="search-bar-blank" :class="{'hide-title':!titleVisible}"></div>
       <div class="search-bar-input">
         <span class="icon-search icon"></span>
-        <input type="text" class="input" :placeholder="$t('home.hint')" v-model="searchText">
+        <input type="text"
+        class="input"
+        :placeholder="$t('home.hint')"
+        v-model="searchText"
+        @click="showHotSearch"
+        >
       </div>
     </div>
   </div>
+  <hot-search-list v-show="hotSearchVisible" ref="hotSearch"></hot-search-list>
+</div>
+
 </template>
 
 <script>
 import { storeHomeMixin } from '@/utils/mixin'
+import HotSearchList from './HotSearchList.vue'
 export default {
   name: '',
   mixins: [storeHomeMixin],
@@ -33,13 +43,41 @@ export default {
     return {
       searchText: '',
       titleVisible: true,
-      shadowVisible: false
+      shadowVisible: false,
+      hotSearchVisible: false
     }
   },
   created () {},
   mounted () {},
   computed: {},
   methods: {
+    back () {
+      if (this.offsetY > 0) {
+        this.showShadow()
+      } else {
+        this.hideShadow()
+      }
+      this.hideHotSearch()
+    },
+    showHotSearch () {
+      this.hideTitle()
+      this.hideShadow()
+      this.hotSearchVisible = true
+      // 需要在dom跟新后进行操作，hotSearchVisible 显示后操作
+      this.$nextTick(() => {
+        this.$refs.hotSearch.reset()
+      })
+    },
+    hideHotSearch () {
+      this.hotSearchVisible = false
+      if (this.offsetY > 0) {
+        this.hideTitle()
+        this.showShadow()
+      } else {
+        this.showTitle()
+        this.hideShadow()
+      }
+    },
     hideTitle () {
       this.titleVisible = false
     },
@@ -53,7 +91,9 @@ export default {
       this.shadowVisible = true
     }
   },
-  components: {},
+  components: {
+    HotSearchList
+  },
   watch: {
     offsetY (offsetY) {
       if (offsetY > 0) {
@@ -61,6 +101,14 @@ export default {
         this.showShadow()
       } else {
         this.showTitle()
+        this.hideShadow()
+      }
+    },
+    // 热门搜索
+    hotSearchOffsetY (offsetY) {
+      if (offsetY > 0) {
+        this.showShadow()
+      } else {
         this.hideShadow()
       }
     }

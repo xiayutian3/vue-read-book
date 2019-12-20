@@ -5,10 +5,16 @@ import { saveLocation, getBookmark } from '@/utils/localStorage'
 // 和图书界面相关的mixin
 export const storeHomeMixin = {
   computed: {
-    ...mapGetters(['offsetY'])
+    ...mapGetters([
+      'offsetY',
+      'hotSearchOffsetY'
+    ])
   },
   methods: {
-    ...mapActions(['setOffsetY'])
+    ...mapActions([
+      'setOffsetY',
+      'setHotSearchOffsetY'
+    ])
   }
 }
 
