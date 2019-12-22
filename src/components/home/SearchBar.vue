@@ -6,7 +6,7 @@
         <div class="title-text-wrapper">
           <div class="title-text title">{{$t('home.title')}}</div>
         </div>
-        <div class="title-icon-shake-wrapper">
+        <div class="title-icon-shake-wrapper" @click="showFlapCard">
           <span class="icon-shake icon"></span>
         </div>
       </div>
@@ -51,6 +51,9 @@ export default {
   mounted () {},
   computed: {},
   methods: {
+    showFlapCard () {
+      this.setFlapCardVisible(true)
+    },
     back () {
       if (this.offsetY > 0) {
         this.showShadow()
