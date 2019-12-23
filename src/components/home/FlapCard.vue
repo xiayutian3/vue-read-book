@@ -1,6 +1,6 @@
 <template>
   <div class="flap-card-wrapper" v-show="flapCardVisible">
-    <div class="flap-card-bg">
+    <div class="flap-card-bg" :class="{animation:runFlapCardAnimation}">
       <div class="flap-card" v-for="(item,index) in flapCardList" :key="index" :style="{zIndex: item.zIndex}">
         <div class="flap-card-circle">
           <div class="flap-card-semi-circle flap-card-semi-circle-left" :style="semiCircleStyle(item,'left')"
@@ -8,6 +8,10 @@
           <div class="flap-card-semi-circle flap-card-semi-circle-right" :style="semiCircleStyle(item,'right')"
           ref="right"></div>
         </div>
+      </div>
+      <!-- //烟花 -->
+      <div class="point-wrapper">
+        <div class="point" :class="{animation:runPointAnimation}" v-for="item in pointList" :key="item"></div>
       </div>
     </div>
     <div class="close-btn-wrapper" @click="close">
@@ -28,15 +32,26 @@ export default {
       flapCardList,
       front: 0,
       back: 1,
-      intervalTime: 25
+      intervalTime: 25,
+      runFlapCardAnimation: false,
+      pointList: [],
+      runPointAnimation: false
     }
   },
-  created () {},
+  created () {
+    this.createPoint()
+  },
   mounted () {
-    this.startFlapCardAnimation()
+    // this.startFlapCardAnimation()
   },
   computed: {},
   methods: {
+    // c创建烟花小球
+    createPoint () {
+      for (let i = 0; i < 18; i++) {
+        this.pointList.push(`point${i}`)
+      }
+    },
     close () {
       this.setFlapCardVisible(false)
     },
@@ -136,13 +151,66 @@ export default {
     startFlapCardAnimation () {
       // 这个初始化没有放到定时器里边，所以每次还要再this.next()中做 一次 this.prepare()
       this.prepare()
-      setInterval(() => {
+      this.task = setInterval(() => {
         this.flapCardRotate()
       }, this.intervalTime)
+
+      // 模仿 api请求，关闭卡片翻转动画
+      setTimeout(() => {
+        this.stopAnimation()
+      }, 2500)
+    },
+    // 开始烟花动画
+    startPointAnimation () {
+      this.runPointAnimation = true
+      // 烟花结束后，去掉css animation
+      setTimeout(() => {
+        this.runPointAnimation = false
+      }, 750)
+    },
+    // 重置所有卡片的样式
+    reset () {
+      this.front = 0
+      this.back = 1
+      this.flapCardList.forEach((item, index) => {
+        item.zIndex = 100 - index
+        // 颜色重置
+        item._g = item.g
+        item.rotateDegree = 0
+        // 位置重置
+        this.rotate(index, 'front')
+        this.rotate(index, 'back')
+      })
+    },
+    // 停止动画
+    stopAnimation () {
+      // 关闭卡片
+      this.runFlapCardAnimation = false
+      // 停止卡片翻转的定时器
+      if (this.task) {
+        clearInterval(this.task)
+      }
+      this.reset()
+    },
+    runAnimation () {
+      this.runFlapCardAnimation = true
+      // 先执行入场动画结束后，再执行翻转动画
+      setTimeout(() => {
+        this.startFlapCardAnimation()
+        this.startPointAnimation()
+      }, 300)
     }
   },
   components: {},
-  watch: {}
+  watch: {
+    flapCardVisible (v) {
+      if (v) {
+        this.runAnimation()
+      } else {
+        this.stopAnimation()
+      }
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>
@@ -161,8 +229,8 @@ export default {
       height: px2rem(64);
       border-radius: px2rem(5);
       background: white;
-      // transform: scale(0);
-      // opacity: 0;
+      transform: scale(0);
+      opacity: 0;
       &.animation {
         animation: flap-card-move .3s ease-in both;
       }
@@ -219,6 +287,7 @@ export default {
           border-radius: 50%;
           @include absCenter;
           &.animation {
+            // scss中的循环
             @for $i from 1 to length($moves) {
               &:nth-child(#{$i}) {
                 @include move($i);

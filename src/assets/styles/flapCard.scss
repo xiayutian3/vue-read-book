@@ -9,6 +9,7 @@ $color-pink-transparent: rgba(255, 102, 159, .5);
 $color-blue-transparent: rgba(74, 171, 255, .5);
 $color-yellow-transparent: rgba(255, 198, 102, .5);
 
+// scss中的数组，对象都是用（）括起来
 $moves: (
         (startX: 0, startY: 0, endX: 0, endY: 55, width: 6, height: 6, background: $color-green),
         (startX: 0, startY: 0, endX: 15, endY: 60, width: 4, height: 4, background: $color-pink-transparent),
@@ -30,13 +31,14 @@ $moves: (
         (startX: 0, startY: 0, endX: -40, endY: 35, width: 4, height: 4, background: $color-green-transparent)
 );
 
+// 应用scss中的循环，调用move混合
 @mixin move($index) {
-  $item: nth($moves, $index);
+  $item: nth($moves, $index); //nth 是scss中的一个函数，直接用即可，从数组中获取对象
   $keyframesName: "move" + $index;
   $animationTime: .75s;
   $animationType: linear;
   $animationIterator: 1;
-  $width: map-get($item, width);
+  $width: map-get($item, width); // map-get 是scss中的一个函数，从对象当中获取属性
   $height: map-get($item, height);
   $backgroud: map-get($item, background);
   $startX: map-get($item, startX);
@@ -48,6 +50,7 @@ $moves: (
   height: px2rem($height);
   background: $backgroud;
   animation: #{$keyframesName} $animationTime $animationType $animationIterator;
+  // #{$keyframesName} 变量
   @keyframes #{$keyframesName} {
     0% {
       transform: translate3d(px2rem($startX), px2rem($startY), 0) scale(0);
