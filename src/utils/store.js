@@ -1,5 +1,6 @@
 // import { getLocalStorage, getBookShelf, saveBookShelf } from './localStorage'
 
+// 反转卡片的样式，颜色，图片
 export const flapCardList = [
   {
     r: 255,
@@ -82,7 +83,7 @@ export const categoryList = {
   'Psychology': 21,
   'Statistics': 22
 }
-
+// 传入分类的id，获取分类的名称
 export function getCategoryName (id) {
   switch (id) {
     case 1:
@@ -131,7 +132,7 @@ export function getCategoryName (id) {
       return 'Statistics'
   }
 }
-
+// 传入分类的id，获取相应的国际化文本
 export function categoryText (category, vue) {
   switch (category) {
     case 1:

@@ -12,6 +12,7 @@ import './assets/styles/icon.css'
 import './assets/fonts/droidSans.css'
 
 import './assets/styles/globle.scss'
+import '@/mock'
 
 Vue.config.productionTip = false
 

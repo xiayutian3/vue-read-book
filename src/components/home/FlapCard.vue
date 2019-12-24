@@ -1,6 +1,6 @@
 <template>
   <div class="flap-card-wrapper" v-show="flapCardVisible">
-    <div class="flap-card-bg" :class="{animation:runFlapCardAnimation}">
+    <div class="flap-card-bg" :class="{animation:runFlapCardAnimation}" v-show="runFlapCardAnimation">
       <div class="flap-card" v-for="(item,index) in flapCardList" :key="index" :style="{zIndex: item.zIndex}">
         <div class="flap-card-circle">
           <div class="flap-card-semi-circle flap-card-semi-circle-left" :style="semiCircleStyle(item,'left')"
@@ -14,6 +14,19 @@
         <div class="point" :class="{animation:runPointAnimation}" v-for="item in pointList" :key="item"></div>
       </div>
     </div>
+    <div class="book-card" :class="{'animation': runBookCardAnimation}" v-show="runBookCardAnimation">
+      <div class="book-card-wrapper">
+        <div class="img-wrapper">
+          <img class="img" :src="data ? data.cover : ''">
+        </div>
+        <div class="content-wrapper">
+          <div class="content-title">{{data ? data.title : ''}}</div>
+          <div class="content-author sub-title-medium">{{data ? data.author : ''}}</div>
+          <div class="content-category">{{categoryText()}}</div>
+        </div>
+        <div class="read-btn" @click.stop="showBookDetail(data)">{{$t('home.readNow')}}</div>
+      </div>
+    </div>
     <div class="close-btn-wrapper" @click="close">
       <div class="icon-close"></div>
     </div>
@@ -22,11 +35,14 @@
 
 <script>
 import { storeHomeMixin } from '@/utils/mixin'
-import { flapCardList } from '@/utils/store'
+import { flapCardList, categoryText } from '@/utils/store'
+
 export default {
   name: '',
   mixins: [storeHomeMixin],
-  props: {},
+  props: {
+    data: Object
+  },
   data () {
     return {
       flapCardList,
@@ -35,7 +51,8 @@ export default {
       intervalTime: 25,
       runFlapCardAnimation: false,
       pointList: [],
-      runPointAnimation: false
+      runPointAnimation: false,
+      runBookCardAnimation: false
     }
   },
   created () {
@@ -53,6 +70,7 @@ export default {
       }
     },
     close () {
+      this.stopAnimation()
       this.setFlapCardVisible(false)
     },
     // 左半边圆和右半边圆的样式设置
@@ -156,9 +174,9 @@ export default {
       }, this.intervalTime)
 
       // 模仿 api请求，关闭卡片翻转动画
-      setTimeout(() => {
-        this.stopAnimation()
-      }, 2500)
+      // setTimeout(() => {
+
+      // }, 2500)
     },
     // 开始烟花动画
     startPointAnimation () {
@@ -181,24 +199,47 @@ export default {
         this.rotate(index, 'front')
         this.rotate(index, 'back')
       })
+      // 重置，卡片，烟花，推荐图书(针对整个页面进行重置)
+      this.runFlapCardAnimation = false
+      this.runPointAnimation = false
+      this.runBookCardAnimation = false
     },
     // 停止动画
     stopAnimation () {
-      // 关闭卡片
-      this.runFlapCardAnimation = false
+      // 关闭卡片(在this.reset()中已重置)
+      // this.runFlapCardAnimation = false
       // 停止卡片翻转的定时器
       if (this.task) {
         clearInterval(this.task)
+      }
+      if (this.timeout) {
+        clearTimeout(this.timeout)
+      }
+      if (this.timeout2) {
+        clearTimeout(this.timeout2)
       }
       this.reset()
     },
     runAnimation () {
       this.runFlapCardAnimation = true
       // 先执行入场动画结束后，再执行翻转动画
-      setTimeout(() => {
+      this.timeout = setTimeout(() => {
         this.startFlapCardAnimation()
         this.startPointAnimation()
       }, 300)
+      // 先停止动画， 再执行显示推荐图书动画
+      this.timeout2 = setTimeout(() => {
+        // 模仿 api请求，关闭卡片翻转动画
+        this.stopAnimation()
+        this.runBookCardAnimation = true
+      }, 2500)
+    },
+    categoryText () {
+      if (this.data) {
+        return categoryText(this.data.category, this)
+      } else {
+        return ''
+      }
     }
   },
   components: {},
