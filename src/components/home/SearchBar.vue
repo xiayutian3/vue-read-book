@@ -23,7 +23,9 @@
         :placeholder="$t('home.hint')"
         v-model="searchText"
         @click="showHotSearch"
+        @keyup.13.exact="search"
         >
+        <!-- @keyup.13.exact:表示点击回车，只能是回车 -->
       </div>
     </div>
   </div>
@@ -51,6 +53,14 @@ export default {
   mounted () {},
   computed: {},
   methods: {
+    search () {
+      this.$router.push({
+        path: '/store/list',
+        query: {
+          keyword: this.searchText
+        }
+      })
+    },
     showFlapCard () {
       this.setFlapCardVisible(true)
     },
