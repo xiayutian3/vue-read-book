@@ -1,42 +1,115 @@
 <template>
-  <div class="shelf-search-wrapper">
-    <div class="shelf-search">
+  <div class="shelf-search-wrapper" :class="{'search-top':ifInputClicked,'hide-shadow':ifHideShadow}">
+    <div class="shelf-search" :class="{'search-top':ifInputClicked}">
       <div class="search-wrapper">
         <div class="icon-search-wrapper">
           <span class="icon-search icon"></span>
         </div>
         <div class="search-input-wrapper">
-          <input type="text" class="search-input" :placeholder="$t('shelf.search')">
+          <input type="text" class="search-input" :placeholder="$t('shelf.search')"
+           @click="onSearchClick" v-model="searchText">
         </div>
-        <div class="icon-clear-wrapper">
+        <div class="icon-clear-wrapper" v-show="searchText.length>0" @click="clearSearchText">
           <span class="icon-close-circle-fill"></span>
         </div>
       </div>
-      <div class="icon-locale-wrapper">
-        <span class="icon-cn icon"></span>
-        <span class="icon-en icon"></span>
+      <div class="icon-locale-wrapper" v-if="!ifInputClicked" @click="switchLocale">
+        <span class="icon-cn icon" v-if="lang === 'cn'"></span>
+        <span class="icon-en icon" v-else></span>
       </div>
-      <div class="cancel-btn-wrapper">
+      <div class="cancel-btn-wrapper" @click="onCancelClick" v-else>
         <span class="cancel-text">{{$t('shelf.cancel')}}</span>
       </div>
     </div>
+    <transition name="hot-search-move">
+      <div class="shelf-search-tab-wrapper" v-if="ifInputClicked">
+        <div class="shelf-search-tab-item" v-for="item in tabs" :key="item.id"
+        @click="onTabClick(item.id)">
+        <span class="shelf-search-tab-text" :class="{'is-selected': item.id === selectedTab}">
+          {{item.text}}
+        </span>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script>
+import { setLocalStorage } from '@/utils/localStorage'
+import { storeShelfMixin } from '@/utils/mixin'
 export default {
   name: '',
+  mixins: [storeShelfMixin],
   props: {},
   data () {
     return {
+      ifInputClicked: false,
+      searchText: '',
+      selectedTab: 1,
+      ifHideShadow: true
     }
   },
   created () {},
   mounted () {},
-  computed: {},
-  methods: {},
+  computed: {
+    lang () {
+      return this.$i18n.locale
+    },
+    // tabs里边有国际化的文本，如果不放在computed中的话，就文字就不会响应的改变，不能放在data中
+    tabs () {
+      return [
+        {
+          id: 1,
+          text: this.$t('shelf.default')
+        },
+        {
+          id: 2,
+          text: this.$t('shelf.progress')
+        },
+        {
+          id: 3,
+          text: this.$t('shelf.purchase')
+        }
+      ]
+    }
+  },
+  methods: {
+    onTabClick (id) {
+      this.selectedTab = id
+    },
+    clearSearchText () {
+      this.searchText = ''
+    },
+    onSearchClick () {
+      this.ifInputClicked = true
+      this.setShelfTitleVisible(false)
+    },
+    onCancelClick () {
+      this.ifInputClicked = false
+      this.setShelfTitleVisible(true)
+    },
+    // 切换语言
+    switchLocale () {
+      if (this.lang === 'en') {
+        this.$i18n.locale = 'cn'
+      } else {
+        this.$i18n.locale = 'en'
+      }
+      // 保存语言到本地
+      setLocalStorage('locale', this.$i18n.locale)
+    }
+  },
   components: {},
-  watch: {}
+  watch: {
+    offsetY (offsetY) {
+      // 搜索框的阴影 1。列表滚动 2.inpu框被点击 ,然后才能显示
+      if (offsetY > 0 && this.ifInputClicked) {
+        this.ifHideShadow = false // 显示阴影
+      } else {
+        this.ifHideShadow = true // 隐藏阴影
+      }
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>
