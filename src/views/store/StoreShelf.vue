@@ -10,6 +10,7 @@
 
 <script>
 import { shelf } from '@/api/store'
+import { appendAddToShelf } from '@/utils/store'
 import Scroll from '@/components/common/Scroll.vue'
 import ShelfSearch from '@/components/shelf/ShelfSearch.vue'
 import ShelfTitle from '@/components/shelf/ShelfTitle.vue'
@@ -36,7 +37,8 @@ export default {
     getShelfList () {
       shelf().then(res => {
         if (res.status === 200 && res.data && res.data.bookList) {
-          this.setShelfList(res.data.bookList)
+          // 添加add标致
+          this.setShelfList(appendAddToShelf(res.data.bookList))
         }
       })
     }

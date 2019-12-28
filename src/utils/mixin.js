@@ -86,13 +86,16 @@ export const storeHomeMixin = {
     // 跳转到图书详情页
     showBookDetail (book) {
       // console.log('showBookDetail')
-      this.$router.push({
-        path: '/store/detail',
-        query: {
-          fileName: book.fileName,
-          category: book.categoryText
-        }
-      })
+
+      // this.$router.push({
+      //   path: '/store/detail',
+      //   query: {
+      //     fileName: book.fileName,
+      //     category: book.categoryText
+      //   }
+      // })
+      // 使用封装好的方法
+      gotoBookDetail(this, book)
     }
   }
 }

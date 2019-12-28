@@ -64,6 +64,7 @@ export function computeId (list) {
   })
 }
 
+// 提取vuex中跳到书城首页的公共部分(封装成方法在vuex中使用)
 export function gotoBookDetail (vue, book) {
   vue.$router.push({
     path: '/store/detail',
@@ -74,12 +75,14 @@ export function gotoBookDetail (vue, book) {
   })
 }
 
+// 去到书城首页
 export function gotoStoreHome (vue) {
   vue.$router.push({
     path: '/store/home'
   })
 }
 
+// 书架中的add标志
 export function appendAddToShelf (list) {
   list.push({
     id: -1,
@@ -88,6 +91,7 @@ export function appendAddToShelf (list) {
   return list
 }
 
+// 移除书架add标致,因为有些时候是不是要add图标的
 export function removeAddFromShelf (list) {
   return list.filter(item => item.type !== 3)
 }
