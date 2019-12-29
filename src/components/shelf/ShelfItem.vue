@@ -5,7 +5,9 @@
     <component class="shelf-item-comp"
               :class="{'is-edit':isEditMode && data.type === 2}"
               :is="item" :data="data"></component>
-    <div class="icon-selected" v-show="isEditMode && data.type === 1"></div>
+    <div class="icon-selected"
+          :class="{'is-selected':data.selected}"
+          v-show="isEditMode && data.type === 1"></div>
   </div>
 </template>
 
@@ -34,13 +36,25 @@ export default {
   },
   methods: {
     onItemClick () {
-      if (this.data.type === 1) {
-        this.showBookDetail(this.data)
-      } else if (this.data.type === 2) {
-
+      // 判断当前是否是编辑模式
+      if (this.isEditMode) {
+        this.data.selected = !this.data.selected
+        if (this.data.selected) {
+          // 把选中的图书放到vuex中，便于管理
+          this.shelfSelected.pushWithoutDuplicate(this.data)
+        } else {
+          // 把id相等的移除出来（留下不相等的）
+          this.setShelfSelected(this.shelfSelected.filter(item => item.id !== this.data.id))
+        }
       } else {
+        if (this.data.type === 1) {
+          this.showBookDetail(this.data)
+        } else if (this.data.type === 2) {
+
+        } else {
         // 去到书城首页
-        gotoStoreHome(this)
+          gotoStoreHome(this)
+        }
       }
     }
   },

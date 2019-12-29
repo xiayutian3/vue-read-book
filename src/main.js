@@ -15,6 +15,12 @@ import './assets/styles/globle.scss'
 // mock不能下载blob，电子书类文件，可以在vue.config中设置第二种mock方法
 // import '@/mock'
 
+// 给数组增添新的方法
+import '@/utils/boost'
+
+// vue-create-api的使用（实现组件的真正解耦,组件就可以已js api 的形势调用，很方便）
+import '@/utils/create-api'
+
 Vue.config.productionTip = false
 
 new Vue({

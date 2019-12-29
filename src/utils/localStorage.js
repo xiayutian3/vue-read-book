@@ -13,10 +13,12 @@ export function removeLocalStorage (key) {
 export function clearLocalStorage () {
   return localStorage.clear()
 }
+
+// 保存书架图书到本地
 export function saveBookShelf (shelf) {
   return setLocalStorage('shelf', shelf)
 }
-
+// 获取书架图书
 export function getBookShelf () {
   return getLocalStorage('shelf')
 }

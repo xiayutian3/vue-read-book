@@ -39,6 +39,11 @@ export default {
   },
   methods: {
     onEditClick () {
+      // 如果不是编辑状态，做一些重置，选中的图书清空，每本书的选中状态也置为false
+      if (!this.isEditMode) {
+        this.setShelfSelected([])
+        this.shelfList.forEach(item => { item.selected = false })
+      }
       this.setIsEditMode(!this.isEditMode)
     },
     clearCache () {
