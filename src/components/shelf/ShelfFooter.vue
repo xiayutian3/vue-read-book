@@ -7,10 +7,11 @@
       <div class="shelf-footer-tab" :class="{'is-selected':isSelected}">
         <div class="icon-private tab-icon" v-if="item.index === 1 && !isPrivate"></div>
         <div class="icon-private-see tab-icon" v-if="item.index === 1 && isPrivate"></div>
-        <div class="icon-download tab-icon" v-if="item.index === 2"></div>
+        <div class="icon-download tab-icon" v-if="item.index === 2 && !isDownload"></div>
+        <div class="icon-download-remove tab-icon" v-if="item.index === 2 && isDownload"></div>
         <div class="icon-move tab-icon" v-if="item.index === 3"></div>
         <div class="icon-shelf tab-icon" v-if="item.index === 4"></div>
-        <div class="tab-text">{{label(item)}}</div>
+        <div class="tab-text" :class="{'remove-text':item.index === 4}">{{label(item)}}</div>
       </div>
     </div>
   </div>
@@ -18,7 +19,9 @@
 
 <script>
 import { storeShelfMixin } from '@/utils/mixin'
-import { saveBookShelf } from '@/utils/localStorage'
+import { saveBookShelf, removeLocalStorage } from '@/utils/localStorage'
+import { removeLocalForage } from '@/utils/localForage'
+import { download } from '@/api/store'
 export default {
   name: '',
   mixins: [storeShelfMixin],
@@ -65,14 +68,88 @@ export default {
       } else {
         return this.shelfSelected.every(item => item.private)
       }
+    },
+    // 数据中有download字段,表示是否缓存过？
+    isDownload () {
+      if (!this.isSelected) {
+        return false
+      } else {
+        return this.shelfSelected.every(item => item.cache)
+      }
     }
 
   },
   methods: {
+    // 选中的电子书下载（离线缓存功能）|加async await 后，主要是为了采取同步执行方法
+    async downloadSelectedBook () {
+      for (let i = 0; i < this.shelfSelected.length; i++) {
+        await this.downloadBook(this.shelfSelected[i]).then((book) => {
+          // 将电子书的缓存设为true，
+          book.cache = true
+        }
+        )
+      }
+    },
+    downloadBook (book) {
+      // console.log('book', book)
+      // 用book里边的数据拼出下载路径
+      return new Promise((resolve, reject) => {
+        download(book, (res) => {
+          // console.log('res', res)
+
+          // 下载完毕后关闭toast
+          // this.toastCC.hide()
+
+          // 直接用create api里的方法，将DOM remove掉
+          this.toastCC.remove()
+
+          resolve(book)
+        }, reject, progressEvent => {
+          // console.log('progressEvent', progressEvent)
+          const progress = Math.floor(progressEvent.loaded / progressEvent.total * 100) + '%'
+          const text = this.$t('shelf.progressDownload').replace('$1', `${book.fileName}.epub(${progress})`)
+          // console.log(text)
+          this.toastCC = this.toast({ text })
+          this.toastCC.continueShow()
+        })
+      })
+    },
+    // 删除缓存的电子书
+    removeSelectedBook () {
+      Promise.all(this.shelfSelected.map(book => this.removeBook(book)))
+        .then(books => {
+          books.map(book => {
+            book.cache = false
+          })
+          this.simpleToast(this.$t('shelf.removeDownloadSuccess'))
+          // 保存shelfList在本地
+          saveBookShelf(this.shelfList)
+        })
+    },
+    removeBook (book) {
+      return new Promise((resolve, reject) => {
+        // 删除本地记录（阅读进度等）
+        removeLocalStorage(`${book.categoryText}/${book.fileName}-info`)
+        // 删除电子书缓存
+        removeLocalForage(`${book.fileName}`)
+        resolve(book)
+      })
+    },
     hidePopub () {
       this.popupMenu.hidePopub()
     },
-    // 设置
+    onComplete () {
+      this.hidePopub()
+      // 将编辑状态置为false
+      this.setIsEditMode(false)
+      // 保存到本地
+      /** w
+       * 保存的是shelfList，而不是shelfSelected？，
+       * 因为shelfSelected是对shelfList的一部分引用，shelfSelected变化，shelfList里也会变化，真正的值都是在shelfList里边
+       */
+      saveBookShelf(this.shelfList)
+    },
+    // 设置隐私
     setPrivate () {
       let isPrivate
       if (this.isPrivate) {
@@ -84,15 +161,7 @@ export default {
       this.shelfSelected.forEach(book => {
         book.private = isPrivate
       })
-      this.hidePopub()
-      // 将编辑状态置为false
-      this.setIsEditMode(false)
-      // 保存到本地
-      /** w
-       * 保存的是shelfList，而不是shelfSelected？，
-       * 因为shelfSelected是对shelfList的一部分引用，shelfSelected变化，shelfList里也会变化，真正的值都是在shelfList里边
-       */
-      saveBookShelf(this.shelfList)
+      this.onComplete()
       // set置后提示信息
       if (isPrivate) {
         this.simpleToast(this.$t('shelf.setPrivateSuccess'))
@@ -100,17 +169,96 @@ export default {
         this.simpleToast(this.$t('shelf.closePrivateSuccess'))
       }
     },
+    // 缓存
+    async setDownload () {
+      this.onComplete()
+      if (this.isDownload) {
+        // 删除缓存的电子书
+        this.removeSelectedBook()
+      } else {
+        // 实际的电子书下载，
+        await this.downloadSelectedBook()
+        // 保存shelfList在本地
+        saveBookShelf(this.shelfList)
+        this.simpleToast(this.$t('shelf.setDownloadSuccess'))
+      }
+    },
+    // 从书架移除图书的方法
+    removeSelected () {
+      // 从选中的图书中看看是否存在书架中，存在就移除
+      this.shelfSelected.forEach(selected => {
+        this.setShelfList(this.shelfList.filter(book => book !== selected))
+      })
+      // 操作完成，把选中的置为空
+      this.setShelfSelected([])
+      this.onComplete()
+    },
     // 显示隐私，弹窗
     showPrivate () {
       // 显示pupop(后面调用的方法与组件里的方法相对应)
       this.popupMenu = this.popup(
         {
-          title: this.$t('shelf.setPrivateTitle'),
+          title: this.isPrivate ? this.$t('shelf.closePrivateTitle') : this.$t('shelf.setPrivateTitle'),
           btn: [
             {
-              text: this.$t('shelf.open'),
+              text: this.isPrivate ? this.$t('shelf.close') : this.$t('shelf.open'),
               click: () => {
                 this.setPrivate()
+              }
+            },
+            {
+              text: this.$t('shelf.cancel'),
+              click: () => {
+                this.hidePopub()
+              }
+            }
+          ]
+        }
+      )
+      this.popupMenu.showPopup()
+    },
+    // 显示download,表示是否缓存过？
+    showDownload () {
+      this.popupMenu = this.popup(
+        {
+          title: this.isDownload ? this.$t('shelf.removeDownloadTitle') : this.$t('shelf.setDownloadTitle'),
+          btn: [
+            {
+              text: this.isDownload ? this.$t('shelf.delete') : this.$t('shelf.open'),
+              click: () => {
+                this.setDownload()
+              }
+            },
+            {
+              text: this.$t('shelf.cancel'),
+              click: () => {
+                this.hidePopub()
+              }
+            }
+          ]
+        }
+      )
+      this.popupMenu.showPopup()
+    },
+    // 移出书架的方法
+    showRemove () {
+      // 标题设置
+      let title
+      if (this.shelfSelected.length === 1) {
+        title = this.$t('shelf.removeBookTitle').replace('$1', `《${this.shelfSelected[0].title}》`)
+      } else {
+        title = this.$t('shelf.removeBookTitle').replace('$1', this.$t('shelf.selectedBooks'))
+      }
+      // popup弹窗设置
+      this.popupMenu = this.popup(
+        {
+          title: title,
+          btn: [
+            {
+              text: this.$t('shelf.removeBook'),
+              type: 'danger',
+              click: () => {
+                this.removeSelected()
               }
             },
             {
@@ -133,10 +281,12 @@ export default {
           this.showPrivate()
           break
         case 2:
+          this.showDownload()
           break
         case 3:
           break
         case 4:
+          this.showRemove()
           break
         default:
           break
@@ -193,6 +343,8 @@ export default {
       switch (item.index) {
         case 1:
           return this.isPrivate ? item.label2 : item.label
+        case 2:
+          return this.isDownload ? item.label2 : item.label
         default:
           return item.label
       }

@@ -3,7 +3,9 @@
     <div class="toast-bg-wrapper" @click.prevent v-if="visible">
       <div class="toast-bg">
         <div class="toast-wrapper">
-          <div class="toast" v-html="showText"></div>
+          <!-- //props 传递的text，不要再data中重新赋值变量来接受（如果有变化需要用computed来接受）
+          ，比如下面的text换成showText就会有问题，变量的值会慢半拍 -->
+          <div class="toast" v-html="text"></div>
         </div>
       </div>
     </div>
