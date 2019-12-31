@@ -1,12 +1,12 @@
 <template>
-  <div class="shelf-list">
+  <div class="shelf-list" :style="{top:shelfListTop}">
     <!-- 过渡动画组 transition-group-->
     <!--
       会给.移除的当前元素添加3个class : list-leave-active list-move list-leave-to
       给需移动位置的元素添加 :.list-move  class
       -->
     <transition-group name="list" tag="div" id="shelf-list">
-      <div class="shelf-list-item-wrapper" v-for="item in shelfList" :key="item.id">
+      <div class="shelf-list-item-wrapper" v-for="item in data" :key="item.id">
         <shelf-item :data="item" :style="{height:itemHeight}"></shelf-item>
         <div class="shelf-list-title-wrapper">
           <span class="shelf-list-title title-small">{{item.title}}</span>
@@ -19,11 +19,17 @@
 <script>
 import { storeShelfMixin } from '@/utils/mixin'
 import ShelfItem from '@/components/shelf/ShelfItem'
-import { realPx } from '@/utils/utils'
+import { realPx, px2rem } from '@/utils/utils'
 export default {
   name: '',
   mixins: [storeShelfMixin],
-  props: {},
+  props: {
+    top: {
+      type: Number,
+      default: 94
+    },
+    data: Array
+  },
   data () {
     return {
     }
@@ -35,6 +41,9 @@ export default {
       // 图片的宽高比是固定的
       // w/250 = h/350  所以: h = w/250*350
       return ((window.innerWidth - realPx(120)) / 3) / 250 * 350 + 'px'
+    },
+    shelfListTop () {
+      return px2rem(this.top) + 'rem'
     }
   },
   methods: {},

@@ -2,14 +2,17 @@
 <transition name="fade">
   <div class="shelf-title" :class="{'hide-shadow':ifHideShadow}" v-show="shelfTitleVisible">
     <div class="shelf-title-text-wrapper">
-      <span class="shelf-title-text">{{$t('shelf.title')}}</span>
+      <span class="shelf-title-text">{{title}}</span>
       <span class="shelf-title-sub-text" v-show="isEditMode">{{selectedText}}</span>
     </div>
-    <div class="shelf-title-btn-wrapper shelf-title-left">
+    <div v-if="!ifShowBack"  class="shelf-title-btn-wrapper shelf-title-left">
       <span class="shelf-title-btn-text" @click="clearCache">{{$t('shelf.clearCache')}}</span>
     </div>
     <div class="shelf-title-btn-wrapper shelf-title-right">
       <span class="shelf-title-btn-text" @click="onEditClick">{{isEditMode?$t('shelf.cancel'):$t('shelf.edit')}}</span>
+    </div>
+    <div v-if="ifShowBack" class="shelf-title-btn-wrapper shelf-title-left">
+      <span class="icon-back" @click="back"></span>
     </div>
   </div>
 </transition>
@@ -22,7 +25,13 @@ import { clearLocalForage } from '@/utils/localForage'
 export default {
   name: '',
   mixins: [storeShelfMixin],
-  props: {},
+  props: {
+    title: String,
+    ifShowBack: {
+      type: Boolean,
+      default: false
+    }
+  },
   data () {
     return {
       ifHideShadow: true
@@ -40,11 +49,22 @@ export default {
     }
   },
   methods: {
+    back () {
+      this.$router.go(-1)
+    },
     onEditClick () {
       // 如果不是编辑状态，做一些重置，选中的图书清空，每本书的选中状态也置为false
       if (!this.isEditMode) {
         this.setShelfSelected([])
-        this.shelfList.forEach(item => { item.selected = false })
+        this.shelfList.forEach(item => {
+          item.selected = false
+          // 可能是图书分类里的情况
+          if (item.itemList) {
+            item.itemList.forEach(subItem => {
+              subItem.selected = false
+            })
+          }
+        })
       }
       this.setIsEditMode(!this.isEditMode)
     },

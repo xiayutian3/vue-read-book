@@ -1,17 +1,21 @@
 <template>
   <div class="store-shelf">
-    <shelf-title :title="$t('shelf.title')"></shelf-title>
-    <scroll class="store-shelf-scroll-wrapper" ref="scroll" :top="0" :bottom="scrollBottom" @onScroll="onScroll">
-      <shelf-search></shelf-search>
-      <shelf-list :data="shelfList"></shelf-list>
+    <shelf-title :title="shelfCategory.title" :ifShowBack="true"></shelf-title>
+    <scroll class="store-shelf-scroll-wrapper"
+            ref="scroll"
+            :top="0"
+            :bottom="scrollBottom"
+            @onScroll="onScroll"
+            v-if="ifShowList">
+      <shelf-list :top="42" :data="shelfCategory.itemList"></shelf-list>
     </scroll>
+    <div class="store-shelf-empty-view" v-else>{{$t('shelf.groupNone')}}</div>
     <shelf-footer></shelf-footer>
   </div>
 </template>
 
 <script>
 import Scroll from '@/components/common/Scroll.vue'
-import ShelfSearch from '@/components/shelf/ShelfSearch.vue'
 import ShelfTitle from '@/components/shelf/ShelfTitle.vue'
 import ShelfList from '@/components/shelf/ShelfList.vue'
 import ShelfFooter from '@/components/shelf/ShelfFooter.vue'
@@ -28,12 +32,15 @@ export default {
   },
   created () {},
   mounted () {
-    this.getShelfList()
-    // 在书架列表中，// 书架分类列表数据，/ 书架列表为1 表示当前在书架，
-    this.setShelfCategory([])
-    this.setCurrentType()
+    // 获取分类列表图书，并设置当前状态为2，即当前在分类中
+    this.getCategoryList(this.$route.query.title)
+    this.setCurrentType(2)
   },
-  computed: {},
+  computed: {
+    ifShowList () {
+      return this.shelfCategory.itemList && this.shelfCategory.itemList.length > 0
+    }
+  },
   methods: {
     onScroll (offsetY) {
       this.setOffsetY(offsetY)
@@ -43,7 +50,6 @@ export default {
   components: {
     ShelfTitle,
     Scroll,
-    ShelfSearch,
     ShelfList,
     ShelfFooter
   },
@@ -72,6 +78,16 @@ export default {
       top: 0;
       left: 0;
       z-index: 101;
+    }
+    .store-shelf-empty-view {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      font-size: px2rem(14);
+      color: #333;
+      @include center;
     }
   }
 </style>

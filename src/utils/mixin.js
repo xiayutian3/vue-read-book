@@ -47,12 +47,12 @@ export const storeShelfMixin = {
             shelfList = appendAddToShelf(res.data.bookList)
             // 保存到本地
             saveBookShelf(shelfList)
-            this.setShelfList(shelfList)
+            return this.setShelfList(shelfList)
           }
         })
       } else {
         // 设置到vuex
-        this.setShelfList(shelfList)
+        return this.setShelfList(shelfList)
       }
     },
     moveOutOfGroup (f) {
