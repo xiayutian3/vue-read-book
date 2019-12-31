@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { setLocalForage } from '../utils/localForage'
-// import { setLocalForage } from '../utils/localForage'
 
 export function flatList () {
   return axios({

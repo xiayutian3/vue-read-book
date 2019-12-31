@@ -79,6 +79,7 @@ $ratio: 375 / 10;
 @mixin scroll {
   overflow-x: hidden;
   overflow-y: scroll;
+  // 提升移动端的性能
   -webkit-overflow-scrolling: touch;
   &::-webkit-scrollbar {
     display: none;

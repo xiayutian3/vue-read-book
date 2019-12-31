@@ -36,18 +36,23 @@ export const storeShelfMixin = {
         this.setShelfCategory(categoryList)
       })
     },
+    // 获取书架列表数据
     getShelfList () {
+      // 缓存数据
       let shelfList = getBookShelf()
       if (!shelfList) {
-        shelf().then(response => {
-          if (response.status === 200 && response.data && response.data.bookList) {
-            shelfList = appendAddToShelf(response.data.bookList)
+        shelf().then(res => {
+          if (res.status === 200 && res.data && res.data.bookList) {
+            // 添加add标致
+            shelfList = appendAddToShelf(res.data.bookList)
+            // 保存到本地
             saveBookShelf(shelfList)
-            return this.setShelfList(shelfList)
+            this.setShelfList(shelfList)
           }
         })
       } else {
-        return this.setShelfList(shelfList)
+        // 设置到vuex
+        this.setShelfList(shelfList)
       }
     },
     moveOutOfGroup (f) {

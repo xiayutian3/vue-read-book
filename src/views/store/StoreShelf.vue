@@ -10,14 +10,13 @@
 </template>
 
 <script>
-import { shelf } from '@/api/store'
-import { appendAddToShelf } from '@/utils/store'
 import Scroll from '@/components/common/Scroll.vue'
 import ShelfSearch from '@/components/shelf/ShelfSearch.vue'
 import ShelfTitle from '@/components/shelf/ShelfTitle.vue'
 import ShelfList from '@/components/shelf/ShelfList.vue'
 import ShelfFooter from '@/components/shelf/ShelfFooter.vue'
 import { storeShelfMixin } from '@/utils/mixin'
+
 export default {
   name: '',
   mixins: [storeShelfMixin],
@@ -35,16 +34,8 @@ export default {
   methods: {
     onScroll (offsetY) {
       this.setOffsetY(offsetY)
-    },
-    // 获取书架列表数据
-    getShelfList () {
-      shelf().then(res => {
-        if (res.status === 200 && res.data && res.data.bookList) {
-          // 添加add标致
-          this.setShelfList(appendAddToShelf(res.data.bookList))
-        }
-      })
     }
+
   },
   components: {
     ShelfTitle,

@@ -2,10 +2,13 @@ import CreateAPI from 'vue-create-api'
 import Vue from 'vue'
 import Toast from '@/components/common/Toast'
 import Popup from '@/components/common/Popup'
+import GroupDialog from '@/components/shelf/ShelfGroupDialog'
 
 Vue.use(CreateAPI)
 Vue.createAPI(Toast, true)
 Vue.createAPI(Popup, true)
+Vue.createAPI(GroupDialog, true)
+
 // vue-create-api的使用案例(公用组件，创建的dom是挂载在body下的，
 //           和app并行，建议组件是全屏的时候使用，如果想让组件挂在vue实例中，建议不使用该方法)
 
@@ -33,6 +36,9 @@ Vue.mixin({
       this.toast({
         text: text
       }).show()
+    },
+    dialog () {
+      return this.$createGroupDialog()
     }
   }
 })

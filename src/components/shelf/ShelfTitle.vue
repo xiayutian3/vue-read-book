@@ -17,6 +17,8 @@
 
 <script>
 import { storeShelfMixin } from '@/utils/mixin'
+import { clearLocalStorage } from '@/utils/localStorage'
+import { clearLocalForage } from '@/utils/localForage'
 export default {
   name: '',
   mixins: [storeShelfMixin],
@@ -46,8 +48,18 @@ export default {
       }
       this.setIsEditMode(!this.isEditMode)
     },
+    // 还原数据（清空缓存）
     clearCache () {
-
+      clearLocalStorage()
+      clearLocalForage()
+      // 清空书架
+      this.setShelfList([])
+      // 清空选中的图书
+      this.setShelfSelected([])
+      // 最后重新获取下数据
+      this.getShelfList()
+      // 提示信息
+      this.simpleToast(this.$t('shelf.clearCacheSuccess'))
     }
   },
   components: {},

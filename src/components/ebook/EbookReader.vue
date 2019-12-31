@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import { getLocalForage } from '@/utils/localForage'
 import { flatten } from '@/utils/book'
 import { ebookMixin } from '@/utils/mixin.js'
 import { saveFontFamily, getFontFamily, getFontSize, saveFontSize, getTheme, saveTheme, getLocation } from '@/utils/localStorage'
@@ -71,10 +72,26 @@ export default {
     // console.log(flatten(nav))
   },
   mounted () {
-    const fileName = this.$route.params.fileName.split('|').join('/')
-    // console.log(`${baseUrl}${fileName}.epub`)
-    this.setFileName(fileName).then(() => {
-      this.initEpub()
+    // 先判断本地缓存有没有电子书（通过blob对象解析）
+    const books = this.$route.params.fileName.split('|')
+    const fileNameLocal = books[1] // 拿到书名
+    getLocalForage(fileNameLocal, (err, blob) => {
+      if (!err && blob) {
+        // console.log('找到离线缓存电子书')
+        this.setFileName(books.join('/')).then(() => {
+          this.initEpub(blob)
+        })
+      } else {
+        // console.log('在线获取电子书')
+        // 第二种方法通过url解析
+        const fileName = books.join('/')
+        // console.log(`${baseUrl}${fileName}.epub`)
+        this.setFileName(fileName).then(() => {
+          // 拼接niginx静态电子书URL
+          const url = `${baseUrl}${this.fileName}.epub`
+          this.initEpub(url)
+        })
+      }
     })
   },
   methods: {
@@ -369,10 +386,8 @@ export default {
         // console.log(navigation)
       })
     },
-    initEpub () {
-      // 拼接niginx静态电子书URL
-      const url = `${baseUrl}${this.fileName}.epub`
-      this.book = new Epub(url)
+    initEpub (url) {
+      this.book = new Epub(url) // 可以解析url，也可以传blob(indexedDB缓存的就是blob对象)
       this.setCurrentBook(this.book)
       // console.log(this.book)
 
