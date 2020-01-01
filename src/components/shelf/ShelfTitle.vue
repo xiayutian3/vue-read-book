@@ -87,10 +87,23 @@ export default {
       this.setShelfList(this.shelfList.filter(book => book.id !== this.shelfCategory.id)).then(() => {
         // 保存图书
         saveBookShelf(this.shelfList)
-        // 返回上一页(不加定时器的话，返回上一页后，toast卡死在页面中)
-        setTimeout(() => {
-          this.$router.go(-1)
-        }, 1500)
+        // 返回上一页(不加定时器的话，返回上一页后，toast卡死在页面中) (router的跳转不能和this.simpleToast()同步执行，不能然toast会停留在跳转后的页面)
+
+        //* ****第一种****（先显示toast，再关闭toast，在跳转）
+        // setTimeout(() => {
+        //   this.$router.go(-1)
+        // }, 1500)
+
+        //* ****第二种****（先跳转，再显示toast，再关闭toast。***这里的话，就不需要mixin moveOutOfGroup方法中再调用this.simpleToast()）
+        // this.$router.go(-1)
+        // let text = this.$t('shelf.moveBookOutSuccess')
+        // setTimeout(() => {
+        //   this.simpleToast('新的' + text)
+        // }, 0)
+
+        //* ***推荐*****第三种****（先显示toast，再关闭toast，在跳转，*******推荐******）
+        this.$router.go(-1)
+
         // 取消编辑模式
         this.setIsEditMode(false)
       })

@@ -66,7 +66,15 @@ export const storeShelfMixin = {
         const list = computeId(appendAddToShelf([].concat(
           removeAddFromShelf(this.shelfList), ...this.shelfSelected)))
         this.setShelfList(list).then(() => {
-          this.simpleToast(this.$t('shelf.moveBookOutSuccess'))
+          // 相应的第一种方式
+          // this.simpleToast(this.$t('shelf.moveBookOutSuccess'))
+          // 相应的第二种方式
+          let text = this.$t('shelf.moveBookOutSuccess')
+          // router的跳转不能和this.simpleToast()同步执行，不能然toast会停留在跳转后的页面不动, 这里用的是vue-create-api插件做的生成toast组件
+          // 加个定时器掉this.simpleToast()即可
+          setTimeout(() => {
+            this.simpleToast(text)
+          })
           if (f) f()
         })
       })
