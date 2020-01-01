@@ -31,7 +31,7 @@ export default {
     this.getShelfList()
     // 在书架列表中，// 书架分类列表数据，/ 书架列表为1 表示当前在书架，
     this.setShelfCategory([])
-    this.setCurrentType()
+    this.setCurrentType(1)
   },
   computed: {},
   methods: {

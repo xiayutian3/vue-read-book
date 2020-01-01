@@ -55,6 +55,7 @@ export const storeShelfMixin = {
         return this.setShelfList(shelfList)
       }
     },
+    // 将图书移出分组的方法
     moveOutOfGroup (f) {
       this.setShelfList(this.shelfList.map(book => {
         if (book.type === 2 && book.itemList) {

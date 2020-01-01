@@ -95,6 +95,8 @@ export default {
     },
     hide () {
       this.$refs.dialog.hide()
+      // 动画持续200ms后再重置ifNewGroup为false，不然动画没关闭完，
+      // ifNewGroup置为了false，就会显示，移动到的弹框
       setTimeout(() => {
         this.ifNewGroup = false
       }, 200)
@@ -115,16 +117,17 @@ export default {
       this.newGroupName = ''
     },
     moveToGroup (group) {
-      // 先把选中的图书从原先的书架过滤掉,在添加到相应的分组中
+      // (书架过滤)先把选中的图书从原先的书架过滤掉,在添加到相应的分组中
       this.setShelfList(this.shelfList
         .filter(book => {
           if (book.itemList) {
+            // 把选中要移出分类的数据过滤掉
             book.itemList = book.itemList.filter(subBook => this.shelfSelected.indexOf(subBook) < 0)
           }
           return this.shelfSelected.indexOf(book) < 0
         }))
         .then(() => {
-          console.log('group', group)
+          // console.log('group', group)
           // 把选中的图书与相应的分组里边的图书进行合并
           if (group && group.itemList) {
             group.itemList = [...group.itemList, ...this.shelfSelected]
@@ -137,6 +140,7 @@ export default {
           this.onComplete()
         })
     },
+    // 只在分组中才能使用，移出分组方法（1先从分类图书中过滤掉，2.再在书架图书中添加）
     moveOutFromGroup () {
       this.moveOutOfGroup(this.onComplete)
     },
@@ -145,6 +149,7 @@ export default {
       if (!this.newGroupName || this.newGroupName.length === 0) {
         return
       }
+      // 判断是新建分组还是修改分组名字
       if (this.showNewGroup) {
         this.shelfCategory.title = this.newGroupName
         this.onComplete()
@@ -169,8 +174,11 @@ export default {
       }
     },
     onComplete () {
+      // 保存书架信息
       saveBookShelf(this.shelfList)
+      // 隐藏弹出
       this.hide()
+      // 关闭编辑模式
       this.setIsEditMode(false)
     }
   }

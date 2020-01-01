@@ -5,14 +5,19 @@
       <span class="shelf-title-text">{{title}}</span>
       <span class="shelf-title-sub-text" v-show="isEditMode">{{selectedText}}</span>
     </div>
-    <div v-if="!ifShowBack"  class="shelf-title-btn-wrapper shelf-title-left">
+    <div  class="shelf-title-btn-wrapper shelf-title-left" v-if="showClear">
       <span class="shelf-title-btn-text" @click="clearCache">{{$t('shelf.clearCache')}}</span>
     </div>
-    <div class="shelf-title-btn-wrapper shelf-title-right">
+    <div class="shelf-title-btn-wrapper shelf-title-right" v-if="showEdit">
       <span class="shelf-title-btn-text" @click="onEditClick">{{isEditMode?$t('shelf.cancel'):$t('shelf.edit')}}</span>
     </div>
-    <div v-if="ifShowBack" class="shelf-title-btn-wrapper shelf-title-left">
+    <div class="shelf-title-btn-wrapper shelf-title-left" v-if="showBack">
       <span class="icon-back" @click="back"></span>
+    </div>
+    <div class="shelf-title-btn-wrapper"
+      :class="{'shelf-title-left': changeGroupLeft, 'shelf-title-right': changeGroupRight}" @click="changeGroup"
+      v-if="showChangeGroup">
+      <span class="shelf-title-btn-text">{{$t('shelf.editGroup')}}</span>
     </div>
   </div>
 </transition>
@@ -20,17 +25,17 @@
 
 <script>
 import { storeShelfMixin } from '@/utils/mixin'
-import { clearLocalStorage } from '@/utils/localStorage'
+import { clearLocalStorage, saveBookShelf } from '@/utils/localStorage'
 import { clearLocalForage } from '@/utils/localForage'
 export default {
   name: '',
   mixins: [storeShelfMixin],
   props: {
-    title: String,
-    ifShowBack: {
-      type: Boolean,
-      default: false
-    }
+    title: String
+    // ifShowBack: {
+    //   type: Boolean,
+    //   default: false
+    // }
   },
   data () {
     return {
@@ -46,11 +51,113 @@ export default {
         selectedNumber === 1 ? this.$t('shelf.haveSelectedBook').replace('$1', selectedNumber)
           : this.$t('shelf.haveSelectedBooks').replace('$1', selectedNumber)
       )
+    },
+    emptyCategory () {
+      return !this.shelfCategory || !this.shelfCategory.itemList || this.shelfCategory.itemList.length === 0
+    },
+    showEdit () {
+      return this.currentType === 1 || !this.emptyCategory
+    },
+    showClear () {
+      return this.currentType === 1
+    },
+    showBack () {
+      return this.currentType === 2 && !this.isEditMode
+    },
+    showChangeGroup () {
+      return this.currentType === 2 && (this.isEditMode || this.emptyCategory)
+    },
+    changeGroupLeft () {
+      return !this.emptyCategory
+    },
+    changeGroupRight () {
+      return this.emptyCategory
+    },
+    popupCancelBtn () {
+      return this.createPopupBtn(this.$t('shelf.cancel'), () => {
+        this.hidePopup()
+      })
     }
   },
   methods: {
+    // 完成的时候，做一些收尾的工作
+    onComplete () {
+      this.hidePopup()
+      // 删除分组
+      this.setShelfList(this.shelfList.filter(book => book.id !== this.shelfCategory.id)).then(() => {
+        // 保存图书
+        saveBookShelf(this.shelfList)
+        // 返回上一页(不加定时器的话，返回上一页后，toast卡死在页面中)
+        setTimeout(() => {
+          this.$router.go(-1)
+        }, 1500)
+        // 取消编辑模式
+        this.setIsEditMode(false)
+      })
+    },
+    // 删除分组（利用移除分组的方法，先全部选中分组的图书，将他们移出去，再删除分组）
+    deleteGroup () {
+      if (!this.emptyCategory) {
+        // 将分组数据全选
+        this.setShelfSelected(this.shelfCategory.itemList)
+        // 移出分组
+        this.moveOutOfGroup(this.onComplete)
+      }
+    },
+    // 修改分组
+    changeGroupName () {
+      this.hidePopup()
+      this.dialog({
+        showNewGroup: true,
+        groupName: this.shelfCategory.title
+      }).show()
+    },
+    hidePopup () {
+      this.popupMenu.hidePopub()
+    },
+    // 创建popup按钮函数
+    createPopupBtn (text, onClick, type = 'normal') {
+      return {
+        text,
+        click: onClick,
+        type
+      }
+    },
+    // 删除popupGroup
+    showDeleteGroup () {
+      // 关闭之前的popup
+      this.hidePopup()
+      // 200ms后动画结束，创建新的popup
+      setTimeout(() => {
+        this.popupMenu = this.popup({
+          title: this.$t('shelf.deleteGroupTitle'),
+          btn: [
+            this.createPopupBtn(this.$t('shelf.confirm'), () => {
+              this.deleteGroup()
+            }, 'danger'),
+            this.popupCancelBtn
+          ]
+        })
+        this.popupMenu.showPopup()
+      }, 200)
+    },
+    changeGroup () {
+      this.popupMenu = this.popup({
+        btn: [
+          this.createPopupBtn(this.$t('shelf.editGroupName'), () => {
+            this.changeGroupName()
+          }),
+          this.createPopupBtn(this.$t('shelf.deleteGroup'), () => {
+            this.showDeleteGroup()
+          }, 'danger'),
+          this.popupCancelBtn
+        ]
+      })
+      this.popupMenu.showPopup()
+    },
     back () {
       this.$router.go(-1)
+      this.setIsEditMode(false)
     },
     onEditClick () {
       // 如果不是编辑状态，做一些重置，选中的图书清空，每本书的选中状态也置为false

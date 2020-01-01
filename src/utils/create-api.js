@@ -37,8 +37,10 @@ Vue.mixin({
         text: text
       }).show()
     },
-    dialog () {
-      return this.$createGroupDialog()
+    dialog (settings) {
+      return this.$createGroupDialog({
+        $props: settings
+      })
     }
   }
 })

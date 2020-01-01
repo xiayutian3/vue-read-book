@@ -52,8 +52,11 @@ export function findBook (fileName) {
   return flatBookList(bookList).find(item => item.fileName === fileName)
 }
 
+// 全部重新计算书架以及分类图书的id，因为从分类中移出，添加到书架中，
+// 分类的数组，书架数组都发生改变
 export function computeId (list) {
   return list.map((book, index) => {
+    // 应为type为3 是那个加号
     if (book.type !== 3) {
       book.id = index + 1
       if (book.itemList) {
