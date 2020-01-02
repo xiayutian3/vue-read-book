@@ -87,7 +87,8 @@ export default {
       this.setShelfList(this.shelfList.filter(book => book.id !== this.shelfCategory.id)).then(() => {
         // 保存图书
         saveBookShelf(this.shelfList)
-        // 返回上一页(不加定时器的话，返回上一页后，toast卡死在页面中) (router的跳转不能和this.simpleToast()同步执行，不能然toast会停留在跳转后的页面)
+        // 返回上一页(不加定时器的话，返回上一页后，toast卡死在页面中) (router的跳转不能和this.simpleToast()同步执行，
+        // toast组件用的是vue-create-api生成， 不能然toast会停留在跳转后的页面)
 
         //* ****第一种****（先显示toast，再关闭toast，在跳转）
         // setTimeout(() => {
