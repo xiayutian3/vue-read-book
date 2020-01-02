@@ -21,7 +21,7 @@ import Epub from 'epubjs'
 global.ePub = Epub
 // nginx静态服务器的路径
 // const baseUrl = 'http://自己的IP:8081/epub/'  //也可以用localhost
-const baseUrl = 'http://localhost:8081/epub/'
+// const baseUrl = 'http://localhost:8081/epub/'
 export default {
   name: 'ebook-reader',
   mixins: [ebookMixin],
@@ -87,8 +87,10 @@ export default {
         const fileName = books.join('/')
         // console.log(`${baseUrl}${fileName}.epub`)
         this.setFileName(fileName).then(() => {
-          // 拼接niginx静态电子书URL
-          const url = `${baseUrl}${this.fileName}.epub`
+          // 拼接niginx静态电子书URL（本地开发）
+          // const url = `${baseUrl}${this.fileName}.epub`
+          // 打包后换成线上地址
+          const url = process.env.VUE_APP_EPUB_URL + '/' + this.fileName + '.epub'
           this.initEpub(url)
         })
       }

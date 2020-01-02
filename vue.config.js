@@ -12,7 +12,7 @@ const flatListData = require('./src/mock/bookFlatList')
 
 module.exports = {
   publicPath: process.env.NODE_ENV === 'production'
-    ? '/'
+    ? '/book'
     : './',
   devServer: {
     before (app) {
@@ -20,6 +20,14 @@ module.exports = {
       mock(app, '/book/shelf', shelfData)
       mock(app, '/book/list', listData)
       mock(app, '/book/flat-list', flatListData)
+    }
+  },
+  // webpack配置(针对打包有些文件过大的问题)
+  configureWebpack: {
+    performance: {
+      hints: 'warning',
+      maxAssetSize: 512 * 1024,
+      maxEntrypointSize: 512 * 1024
     }
   }
 }

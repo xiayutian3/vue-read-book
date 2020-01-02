@@ -38,7 +38,7 @@ export default {
     return {
       scrollTop: 94,
       random: null,
-      banner: null,
+      banner: '',
       guessYouLike: null,
       recommend: null,
       featured: null,
@@ -64,7 +64,8 @@ export default {
       }
       // res.guessYouLike
     }).catch(err => {
-      console.log(err)
+      if (err) {}
+      // console.log(err)
     })
   },
   computed: {},
