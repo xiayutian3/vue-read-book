@@ -179,6 +179,7 @@ export default {
       } else {
         // 如果电子书不存在于书架，则添加电子书到书架
         addToShelf(this.bookItem)
+        // 调用vuex进行书架图书的更新
         this.setShelfList(getBookShelf())
       }
     },
@@ -346,6 +347,7 @@ export default {
   mounted () {
     this.init()
     if (!this.shelfList || this.shelfList.length === 0) {
+      // 再当前页面刷新，数据消失，所以要获取下
       this.getShelfList()
     }
   }

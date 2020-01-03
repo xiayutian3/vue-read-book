@@ -1,24 +1,35 @@
 import { getLocalStorage, getBookShelf, saveBookShelf } from './localStorage'
 
+// 将图书添加到书架中
 export function addToShelf (book) {
+  // 获取本地保存的书架图书
   let shelfList = getBookShelf()
+  // 去掉书架图书列表最后的加号
   shelfList = removeAddFromShelf(shelfList)
+  // 类型1为图书 2为分类 3为add符号
   book.type = 1
+  // 添加到书架
   shelfList.push(book)
+  // 重新编排书的id
   shelfList = computeId(shelfList)
+  // 把加号添加回去
   shelfList = appendAddToShelf(shelfList)
+  // 保存书架图书到本地
   saveBookShelf(shelfList)
 }
 
+// 从书架图书中移除其中一本图书
 export function removeFromBookShelf (book) {
   return getBookShelf().filter(item => {
     if (item.itemList) {
+      // 递归调用
       item.itemList = removeAddFromShelf(item.itemList)
     }
     return item.fileName !== book.fileName
   })
 }
 
+// 扁平化书架数组的操作(转化为一维数组)
 export function flatBookList (bookList) {
   if (bookList) {
     let orgBookList = bookList.filter(item => {
