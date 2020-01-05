@@ -3,6 +3,7 @@ const mysql = require('mysql')
 // 处理跨域
 const cors = require('cors')
 const constant = require('./const')
+const voice = require('./voice')
 const app = express()
 // 处理跨域
 app.use(cors())
@@ -417,6 +418,12 @@ app.get('/book/shelf', (req, res) => {
     bookList: []
   })
 })
+
+// 引入语音合成部分
+app.get('/voice', (req, res) => {
+  voice(req, res)
+})
+
 const server = app.listen(3000, () => {
   const host = server.address().address
   const port = server.address().port
