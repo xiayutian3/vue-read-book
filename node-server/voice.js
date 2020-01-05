@@ -72,8 +72,8 @@ function createVoice (req, res) {
       console.log(percent)
     })
     response.on('end', () => {
-      console.log(response.headers)
-      console.log(mp3)
+      // console.log(response.headers)
+      // console.log(mp3)
       // 判断返回内容的类型
       const contentType = response.headers['content-type']
       if (contentType === 'text/html') {
