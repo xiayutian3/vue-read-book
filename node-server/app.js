@@ -1,7 +1,11 @@
 const express = require('express')
 const mysql = require('mysql')
+// 处理跨域
+const cors = require('cors')
 const constant = require('./const')
 const app = express()
+// 处理跨域
+app.use(cors())
 
 app.get('/', (req, res) => {
   res.send(new Date().toDateString())
@@ -16,7 +20,9 @@ function connect () {
     database: 'book'
   })
 }
-app.get('/book/list', (req, res) => {
+
+// 测试用的(api)没有实际意义
+app.get('/book/text-all', (req, res) => {
   // 连接数据库
   const conn = connect()
   // 查询结果
@@ -79,6 +85,7 @@ function createData (results, key) {
   return handleData(results[key])
 }
 
+// 对图书加一些处理（进行一些属性添加，在前端用到）
 function handleData (data) {
   // 处理封面图片 判断是不是以http://开头，不是的话，将路径映射到本地的nginx服务器
   if (!data.cover.startsWith('http://')) {
@@ -131,8 +138,11 @@ function createCategoryData (data) {
       list: subList
     })
   })
-  return result
+  // 过滤掉长度小于4的图书分类
+  return result.filter(item => item.list.length <= 4)
 }
+
+// 书城首页api
 app.get('/book/home', (req, res) => {
   // 连接数据库
   const conn = connect()
@@ -141,8 +151,7 @@ app.get('/book/home', (req, res) => {
     if (!err) {
       const length = results.length
       const guessYouLike = []
-      const banner = ''
-      // const banner = constant.resUrl + '/home_banner2.jpg'
+      const banner = constant.resUrl + '/home_banner2.jpg'
       const recommend = []
       const featured = []
       const random = []
@@ -316,6 +325,98 @@ app.get('/book/home', (req, res) => {
   })
 })
 
+// 图书详情api
+app.get('/book/detail', (req, res) => {
+  // 连接数据库
+  const conn = connect()
+  const fileName = req.query.fileName
+  // sql查询语句里边字符串用单引号
+  const sql = `select * from book where fileName='${fileName}'`
+  conn.query(sql, (err, results) => {
+    if (err) {
+      res.json({
+        error_code: 1,
+        msg: '电子书详情获取失败'
+      })
+    } else {
+      if (results && results.length === 0) {
+        res.json({
+          error_code: 1,
+          msg: '电子书详情获取失败'
+        })
+      } else {
+        // 加一些处理
+        const book = handleData(results[0])
+        res.json({
+          error_code: 0,
+          msg: '获取成功',
+          data: book
+        })
+      }
+    }
+    // 关闭数据库
+    conn.end()
+  })
+})
+
+// 首页分类列表图书api(二维数组)
+app.get('/book/list', (req, res) => {
+  const conn = connect()
+  // 查找封面不为空，sql语句字符串用单引号
+  conn.query('select * from book where cover !=\'\'', (err, results) => {
+    if (err) {
+      res.json({
+        error_code: 1,
+        msg: '获取失败'
+      })
+    } else {
+      // 对数据进行一些处理
+      results.map(item => handleData(item))
+      const data = {}
+      // 找到分类相同的图书
+      constant.category.forEach(categoryText => {
+        data[categoryText] = results.filter(item => item.categoryText === categoryText)
+      })
+      res.json({
+        error_code: 0,
+        msg: '获取成功',
+        data: data,
+        total: results.length
+      })
+    }
+    conn.end()
+  })
+})
+// (提供给图书搜索使用)首页分类列表图书api（一维数组）
+app.get('/book/flat-list', (req, res) => {
+  const conn = connect()
+  // 查找封面不为空，sql语句字符串用单引号
+  conn.query('select * from book where cover !=\'\'', (err, results) => {
+    if (err) {
+      res.json({
+        error_code: 1,
+        msg: '获取失败'
+      })
+    } else {
+      // 对数据进行一些处理
+      results.map(item => handleData(item))
+      res.json({
+        error_code: 0,
+        msg: '获取成功',
+        data: results,
+        total: results.length
+      })
+    }
+    conn.end()
+  })
+})
+
+// 书架列表展示
+app.get('/book/shelf', (req, res) => {
+  res.json({
+    bookList: []
+  })
+})
 const server = app.listen(3000, () => {
   const host = server.address().address
   const port = server.address().port

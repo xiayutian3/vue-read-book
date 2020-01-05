@@ -12,7 +12,7 @@ import './assets/styles/icon.css'
 import './assets/fonts/droidSans.css'
 
 import './assets/styles/globle.scss'
-// mock不能下载blob，电子书类文件，可以在vue.config中设置第二种mock方法
+// 第一种方式mock mock不能下载blob，电子书类文件，可以在vue.config中设置第二种mock方法
 // import '@/mock'
 
 // 给数组增添新的方法
