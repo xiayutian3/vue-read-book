@@ -5,6 +5,12 @@
 - 2.运行项目 npm run serve
 - 3.输入地址（例如）localhost 或者IP
 - http://localhost:8080/#/ebook/History|2018_Book_GlobalHistoryAndNewPolycentric
+
+## 例如：
+- nginx资源访问
+- http://localhost:8081/theme/theme_default.css
+- 电子书访问
+- http://192.168.254.104:8080/#/ebook/History|2018_Book_GlobalHistoryAndNewPolycentric
 ## tips：
 - 换成本地服务node+express +mysql 后，除了语音功能外，其他功能都没有问题，
 - 科大讯飞语音文档，api接口都更新了，所以换成本地服务后，语音用不了(2020/1/7)
