@@ -15,9 +15,9 @@ app.get('/', (req, res) => {
 // 连接数据库(生成连接字符串，之后就可以生成sql语句来查询)
 function connect () {
   return mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
+    host: constant.dbHost,
+    user: constant.dbUser,
+    password: constant.dbPwd,
     database: 'book'
   })
 }
