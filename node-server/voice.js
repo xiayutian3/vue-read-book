@@ -7,10 +7,10 @@ const mp3FilePath = require('./const').mp3FilePath
 const resUrl = require('./const').resUrl
 
 function createVoice (req, res) {
-  // const text = req.query.text
-  // const lang = req.query.lang
-  const text = '讯飞科大语音测试'
-  const lang = 'cn'
+  const text = req.query.text
+  const lang = req.query.lang
+  // const text = '讯飞科大语音测试'
+  // const lang = 'cn'
 
   // 引擎类型
   let engineType = 'intp65'
